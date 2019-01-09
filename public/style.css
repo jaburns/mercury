@@ -1,0 +1,20 @@
+html, body {
+    background-color: #222;
+    font-family: sans-serif;
+    color: #ccc;
+}
+canvas {
+    background-color: #000;
+    margin: 10px;
+}
+button {
+    font-size: 16px;
+}
+#inspectRange {
+    width: 320px;
+}
+.formRow label {
+    display: inline-block;
+    text-align: right;
+    width: 200px;
+}
