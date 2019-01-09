@@ -1,20 +1,24 @@
-html, body {
-    background-color: #222;
+body {
+    padding: 20px;
+    background: #39312C;
+    color: #999;
     font-family: sans-serif;
-    color: #ccc;
+    font-weight: 1;
 }
-canvas {
+.interaction {
     background-color: #000;
     margin: 10px;
 }
 button {
     font-size: 16px;
 }
-#inspectRange {
-    width: 320px;
+.title {
+    font-size: 250%;
 }
-.formRow label {
-    display: inline-block;
-    text-align: right;
-    width: 200px;
+a {
+    color: #6F7FB7;
+    text-decoration: none;
+}
+a:hover {
+    color: #7F8FC7;
 }

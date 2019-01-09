@@ -1,7 +1,7 @@
-import { initPost as initPost_firstPost } from './posts/first-post';
+import { initPost as initPost_firstPost } from './vector-caves';
 
 const initters: {[key: string]: () => void} = {
-    'first-post': initPost_firstPost
+    'vector-caves': initPost_firstPost
 };
 
 const initPost = (name: string): void => {
