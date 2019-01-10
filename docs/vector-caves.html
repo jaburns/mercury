@@ -4,7 +4,10 @@
         <title>jaburns.net - Vector Caves</title>
         <link rel="stylesheet" type="text/css" href="style.css" />
         <style>
-            #first-canvas {
+            canvas {
+                margin: auto;
+                display: block;
+                border: 10px solid #29211c;
                 background-color: white;
             }
         </style>
@@ -15,9 +18,9 @@
             <div class="title">Generating vector caves from cellular automata</div>
 
             <p>Let's use cellular automata to generate a pixel map and then use basic image processing techniques
-            to approximate the boundaries between light and dark areas with smooth curves!</p>
+            to approximate the boundaries between light and dark areas with smooth curves! Click the white square
+            to randomly place black squares.</p>
 
-            <button id="hello-button">Hello world</button>
             <canvas id="first-canvas" width="300" height="300"></canvas>
 
             <p> Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean viverra risus feugiat lacus interdum consequat. Duis consequat, lorem nec efficitur fringilla, ante sapien iaculis massa, sed luctus est odio vel urna. In lacinia lobortis velit, sit amet pharetra quam dictum quis. Quisque at purus tincidunt, aliquet metus vel, sodales mi. Curabitur mattis egestas eros, sed iaculis mi. Vestibulum et elementum lectus, maximus consectetur libero. Fusce mollis congue libero eu sagittis. Mauris vitae tempor augue. In sit amet elit rhoncus, sollicitudin eros ut, fringilla quam. Proin quis nisl in leo elementum porttitor et nec diam. Fusce mollis velit enim. </p>

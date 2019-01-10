@@ -22,15 +22,13 @@ body {
     font-weight: 1;
     font-size: 250%;
 }
-.index-link {
-    font-family: monospace;
-    font-size: 150%;
-    font-weight: 1;
-}
-.index-link a {
+a {
     color: #6F7FB7;
     text-decoration: none;
 }
-.index-link a:hover {
+a:hover {
     color: #7F8FC7;
+}
+canvas {
+    user-select: none;
 }
