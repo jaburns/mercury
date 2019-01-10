@@ -6,7 +6,7 @@ module.exports = {
     devtool: 'source-map',
     entry: './src/main.ts',
     output: {
-        path: __dirname+'/public',
+        path: __dirname+'/docs',
         filename: 'bundle.js'
     },
     resolve: {
