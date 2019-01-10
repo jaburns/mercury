@@ -1,12 +1,8 @@
-import { initPost as initPost_firstPost } from './vector-caves';
+import { initPost as initPost_vectorCaves } from './vector-caves';
 
-const initters: {[key: string]: () => void} = {
-    'vector-caves': initPost_firstPost
+const postInitters: {[key: string]: () => void} = {
+    'vector-caves': initPost_vectorCaves
 };
 
-const initPost = (name: string): void => {
-    const initter = initters[name];
-    if (initter) initter();
-};
-
-(window as any).initPost = initPost;
+(window as any).initPost = (name: string): void =>
+    postInitters[name]();
