@@ -2,23 +2,20 @@ body {
     padding: 20px;
     background: #39312C;
     color: #999;
-    font-family: sans-serif;
-    font-weight: 1;
-}
-.interaction {
-    background-color: #000;
-    margin: 10px;
-}
-button {
-    font-size: 16px;
 }
 .title {
+    font-family: monospace;
+    font-weight: 1;
     font-size: 250%;
 }
-a {
+.index-link {
+    font-family: monospace;
+    font-weight: 1;
+}
+.index-link a {
     color: #6F7FB7;
     text-decoration: none;
 }
-a:hover {
+.index-link a:hover {
     color: #7F8FC7;
 }
