@@ -27,14 +27,7 @@ interface Grid<T> {
 }
 
 type GridCallback<T> = (x: number, y: number, val: T) => void;
-
-const iterateGrid = <T>(grid: Grid<T>, fn: GridCallback<T>): void => {
-    for (let x = 0; x < grid.width; ++x) {
-        for (let y = 0; y < grid.height; ++y) {
-            fn(x, y, grid.at(x, y));
-        }
-    }
-};
+type GridMapper<T,U> = (x: number, y: number, val: T) => U;
 
 class WriteGrid<T> implements Grid<T> {
     public readonly width: number;
@@ -64,6 +57,37 @@ class WriteGrid<T> implements Grid<T> {
         }
     }
 }
+
+const findGrid = <T>(grid: Grid<T>, test: GridMapper<T, boolean>): { x: number, y: number } | null => {
+    for (let x = 0; x < grid.width; ++x) {
+        for (let y = 0; y < grid.height; ++y) {
+            if (test(x, y, grid.at(x, y))) {
+                return { x, y };
+            }
+        }
+    }
+    return null;
+};
+
+const iterateGrid = <T>(grid: Grid<T>, fn: GridCallback<T>): void => {
+    for (let x = 0; x < grid.width; ++x) {
+        for (let y = 0; y < grid.height; ++y) {
+            fn(x, y, grid.at(x, y));
+        }
+    }
+};
+
+const mapGrid = <T, U>(grid: Grid<T>, fn: GridMapper<T, U>): WriteGrid<U> => {
+    const result = new WriteGrid<U>(grid.width, grid.height);
+
+    for (let x = 0; x < grid.width; ++x) {
+        for (let y = 0; y < grid.height; ++y) {
+            result.write(x, y, fn(x, y, grid.at(x, y)));
+        }
+    }
+
+    return result;
+};
 
 const getNeighborhood = (map: Grid<boolean>, x: number, y: number): number => {
     let result: number = 0;
@@ -106,6 +130,54 @@ const generate = (width: number, height: number, seed: number, population: numbe
     return result;
 }
 
+const floodFill = (grid: WriteGrid<number>, x: number, y: number, replace: number, value: number, count: number): number => {
+    if (x < 0 || y < 0) return count;
+    if (x >= grid.width || y >= grid.height) return count;
+
+    const tile = grid.at(x, y);
+
+    if (tile === value) return count;
+    if (tile !== replace) return count;
+
+    grid.write(x, y, value);
+    count++;
+
+    count = floodFill(grid, x - 1, y, replace, value, count);
+    count = floodFill(grid, x + 1, y, replace, value, count);
+    count = floodFill(grid, x, y - 1, replace, value, count);
+    count = floodFill(grid, x, y + 1, replace, value, count);
+
+    return count;
+};
+
+const colorGridRegions = (grid: WriteGrid<number>): void => {
+    let color = 1;
+
+    while (true) {
+        const pos = findGrid(grid, (x, y, val) => val === 0);
+        if (pos === null) return;
+
+        const size = floodFill(grid, pos.x, pos.y, 0, color, 0);
+        console.log(size);
+
+        color++;
+    }
+};
+
+const gridColorForNumber = (n: number): string => {
+    switch (n) {
+        case -1: return '#300';
+        case  0: return '#3FF';
+        case  1: return '#3F0';
+        case  2: return '#3FF';
+        case  3: return '#30F';
+        case  4: return '#300';
+        case  5: return '#3F0';
+        case  6: return '#30F';
+    }
+    return '#777';
+};
+
 const multibind = (objs: any[], events: string[], listener: Function): void => {
     objs.forEach(o => {
         events.forEach(e => {
@@ -122,9 +194,12 @@ export const initPost = () :void => {
     const popSlider = document.getElementById('pop-slider') as HTMLInputElement;
     const genSlider = document.getElementById('gen-slider') as HTMLInputElement;
 
+    const secondCanvas = document.getElementById('second-canvas') as HTMLCanvasElement;
+    const ctx2 = secondCanvas.getContext('2d') as CanvasRenderingContext2D;
+
     const update = () :void => {
         const grid = generate(
-            150, 150,
+            75, 75,
             parseInt(seedSlider.value),
             parseFloat(popSlider.value),
             5, 4,
@@ -135,9 +210,16 @@ export const initPost = () :void => {
         ctx.fillRect(0, 0, 300, 300);
 
         ctx.fillStyle = '#000';
-
         iterateGrid(grid, (x, y, val) => {
-            if (val) ctx.fillRect(2*x, 2*y, 2, 2);
+            if (val) ctx.fillRect(4*x, 4*y, 4, 4);
+        });
+
+        const coloredGrid = mapGrid(grid, (x, y, val) => val ? -1 : 0);
+        colorGridRegions(coloredGrid);
+
+        iterateGrid(coloredGrid, (x, y, val) => {
+            ctx2.fillStyle = gridColorForNumber(val);
+            ctx2.fillRect(4*x, 4*y, 4, 4);
         });
     };
 

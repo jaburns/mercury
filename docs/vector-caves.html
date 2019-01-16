@@ -22,14 +22,28 @@
         <main class="contents">
             <div class="title">Generating vector caves from cellular automata</div>
 
-            <p>Let's use cellular automata to generate a pixel map and then use basic image processing techniques
-            to approximate the boundaries between light and dark areas with smooth curves! Click the white square
-            to randomly place black squares.</p>
+            <p>Let's make a little shooter game in a procedurally generated cave. 
+            We'll start off by generating a low res pixel map. 
+            <a href="https://blog.jrheard.com/procedural-dungeon-generation-cellular-automata" >
+            This blog post does a great job of describing the technique.</a> 
+            </p>
 
             <canvas id="first-canvas" width="300" height="300"></canvas>
             <p><input id="seed-slider" type="range" min="0" max="100" step="1" value="50"></p>
-            <p><input id="pop-slider" type="range" min="0" max="1" step="0.01" value="0.45"></p>
+            <p><input id="pop-slider" type="range" min="0" max="1" step="0.01" value="0.48"></p>
             <p><input id="gen-slider" type="range" min="0" max="50" step="1" value="10"></p>
+
+            <p>This technique does a good job of generating dungeon-like shapes, but 
+            it often leaves us with inaccessible rooms. Since we don't want the players
+            to be able spawn in tiny isolated chambers, let's color all the contiguous
+            chambers and fill in all but the largest one with dirt.
+            </p>
+
+            <canvas id="second-canvas" width="300" height="300"></canvas>
+
+            <p>Once we have the generated grid, we can mark off all the tiles that
+            represent edges. These are the tiles that we'll want to draw contours along.
+            </p>
 
             <p> Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean viverra risus feugiat lacus interdum consequat. Duis consequat, lorem nec efficitur fringilla, ante sapien iaculis massa, sed luctus est odio vel urna. In lacinia lobortis velit, sit amet pharetra quam dictum quis. Quisque at purus tincidunt, aliquet metus vel, sodales mi. Curabitur mattis egestas eros, sed iaculis mi. Vestibulum et elementum lectus, maximus consectetur libero. Fusce mollis congue libero eu sagittis. Mauris vitae tempor augue. In sit amet elit rhoncus, sollicitudin eros ut, fringilla quam. Proin quis nisl in leo elementum porttitor et nec diam. Fusce mollis velit enim. </p>
             <p> Proin non nulla eu quam volutpat ultrices sit amet eget nunc. Suspendisse venenatis aliquet lorem, eget feugiat felis rutrum vitae. Ut semper ante sit amet lacinia consectetur. Phasellus lobortis ante vitae metus finibus commodo. Maecenas sed fringilla ex. Morbi at mi sed orci fringilla condimentum. Duis in quam et turpis aliquet pharetra id quis velit. Integer placerat purus eget gravida rutrum. Aliquam tristique nisi vel quam vestibulum ullamcorper. Proin consectetur eget lacus quis imperdiet. Nullam facilisis porta felis vitae vehicula. Mauris at leo vitae nunc faucibus volutpat sit amet ut est. Phasellus nisl ipsum, iaculis nec gravida suscipit, tincidunt a nisl. </p>
