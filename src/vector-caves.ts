@@ -150,32 +150,38 @@ const floodFill = (grid: WriteGrid<number>, x: number, y: number, replace: numbe
     return count;
 };
 
-const colorGridRegions = (grid: WriteGrid<number>): void => {
+const colorGridRegions = (grid: WriteGrid<number>): number => {
     let color = 1;
+    let largestColor = -1;
+    let largestRegion = 0;
 
     while (true) {
         const pos = findGrid(grid, (x, y, val) => val === 0);
-        if (pos === null) return;
+        if (pos === null) return largestColor;
 
         const size = floodFill(grid, pos.x, pos.y, 0, color, 0);
-        console.log(size);
+
+        if (size > largestRegion) {
+            largestRegion = size;
+            largestColor = color;
+        }
 
         color++;
     }
 };
 
+
 const gridColorForNumber = (n: number): string => {
-    switch (n) {
-        case -1: return '#300';
-        case  0: return '#3FF';
-        case  1: return '#3F0';
-        case  2: return '#3FF';
-        case  3: return '#30F';
-        case  4: return '#300';
-        case  5: return '#3F0';
-        case  6: return '#30F';
+    if (n < 0) return '#000';
+    switch (n % 6) {
+        case  0: return '#F00';
+        case  1: return '#0F0';
+        case  2: return '#00F';
+        case  3: return '#0FF';
+        case  4: return '#F0F';
+        case  5: return '#FF0';
     }
-    return '#777';
+    return '';
 };
 
 const multibind = (objs: any[], events: string[], listener: Function): void => {
@@ -197,6 +203,9 @@ export const initPost = () :void => {
     const secondCanvas = document.getElementById('second-canvas') as HTMLCanvasElement;
     const ctx2 = secondCanvas.getContext('2d') as CanvasRenderingContext2D;
 
+    const thirdCanvas = document.getElementById('third-canvas') as HTMLCanvasElement;
+    const ctx3 = thirdCanvas.getContext('2d') as CanvasRenderingContext2D;
+
     const update = () :void => {
         const grid = generate(
             75, 75,
@@ -206,20 +215,24 @@ export const initPost = () :void => {
             parseInt(genSlider.value)
         );
 
-        ctx.fillStyle = '#FFF';
-        ctx.fillRect(0, 0, 300, 300);
-
-        ctx.fillStyle = '#000';
         iterateGrid(grid, (x, y, val) => {
-            if (val) ctx.fillRect(4*x, 4*y, 4, 4);
+            ctx.fillStyle = val ? '#000' : '#FFF';
+            ctx.fillRect(4*x, 4*y, 4, 4);
         });
 
         const coloredGrid = mapGrid(grid, (x, y, val) => val ? -1 : 0);
-        colorGridRegions(coloredGrid);
+        const bigColor = colorGridRegions(coloredGrid);
 
         iterateGrid(coloredGrid, (x, y, val) => {
             ctx2.fillStyle = gridColorForNumber(val);
             ctx2.fillRect(4*x, 4*y, 4, 4);
+        });
+
+        const filledMap = mapGrid(coloredGrid, (x, y, val) => val !== bigColor);
+
+        iterateGrid(filledMap, (x, y, val) => {
+            ctx3.fillStyle = val ? '#000' : '#FFF';
+            ctx3.fillRect(4*x, 4*y, 4, 4);
         });
     };
 
