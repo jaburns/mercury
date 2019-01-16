@@ -8,7 +8,6 @@
                 text-align: center;
             }
             canvas {
-                margin: 0 auto;
                 display: inline-block;
                 border: 10px solid #29211c;
                 background-color: white;
@@ -31,7 +30,7 @@
             This blog post does a great job of describing the technique.</a> 
             </p>
 
-            <div id="canvas-holder">
+            <div class="canvas-holder">
                 <canvas id="first-canvas" width="300" height="300"></canvas>
             </div>
 
@@ -45,8 +44,10 @@
             chambers and fill in all but the largest one with dirt.
             </p>
 
-            <canvas id="second-canvas" width="300" height="300"></canvas>
-            <canvas id="third-canvas" width="300" height="300"></canvas>
+            <div class="canvas-holder">
+                <canvas id="second-canvas" width="300" height="300"></canvas>
+                <canvas id="third-canvas" width="300" height="300"></canvas>
+            </div>
 
             <p>
             Now that we can safely throw the player in to any white region, and they will
