@@ -25,7 +25,7 @@
             <div class="title">Generating vector caves from cellular automata</div>
 
             <p>Let's make a little shooter game in a procedurally generated cave. 
-            We'll start off by generating a low res pixel map. 
+            We'll start off by using a 2D cellular automaton to generate a cave shape.
             <a href="https://blog.jrheard.com/procedural-dungeon-generation-cellular-automata" >
             This blog post does a great job of describing the technique.</a> 
             </p>
@@ -53,8 +53,14 @@
             Now that we can safely throw the player in to any white region, and they will
             be able to navigate to anywhere else on the map, the next step is to turn this
             blocky world in to something smooth. First let's mark off every dirt tile that 
-            has air in its von Neumann neighborhood.
+            has air in its von Neumann neighborhood. While we're at it, we can assign each
+            of these surface tiles a 2D normal direction by looking at <i>which</i> tiles
+            exactly are the ones with air.
             </p>
+
+            <div class="canvas-holder">
+                <canvas id="fourth-canvas" width="300" height="300"></canvas>
+            </div>
 
             <br /> <br /> <br /> <br /> <br /> <br />
             <p> Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean viverra risus feugiat lacus interdum consequat. Duis consequat, lorem nec efficitur fringilla, ante sapien iaculis massa, sed luctus est odio vel urna. In lacinia lobortis velit, sit amet pharetra quam dictum quis. Quisque at purus tincidunt, aliquet metus vel, sodales mi. Curabitur mattis egestas eros, sed iaculis mi. Vestibulum et elementum lectus, maximus consectetur libero. Fusce mollis congue libero eu sagittis. Mauris vitae tempor augue. In sit amet elit rhoncus, sollicitudin eros ut, fringilla quam. Proin quis nisl in leo elementum porttitor et nec diam. Fusce mollis velit enim. </p>
