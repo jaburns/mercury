@@ -36,6 +36,12 @@ export class WriteGrid<T> implements Grid<T> {
     }
 }
 
+export const safeOutOfBounds = <T>(grid: Grid<T>, oobValue: T): Grid<T> => ({
+    width: grid.width,
+    height: grid.height,
+    at: (x, y) => x < 0 || y < 0 || x >= grid.width || y >= grid.width ? oobValue : grid.at(x, y)
+});
+
 export const GridTool = {
     find: <T>(grid: Grid<T>, test: GridMapper<T, boolean>): { x: number, y: number } | null => {
         for (let x = 0; x < grid.width; ++x) {

@@ -1,5 +1,5 @@
-import { Grid, WriteGrid, GridTool } from './grid';
-import { Vec3 } from './math';
+import { Grid, WriteGrid, GridTool, safeOutOfBounds } from './grid';
+import { Vec2, smallestDifferenceRadians } from './math';
 
 export interface EdgeMarkedMapTile {
     kind: 'air' | 'dirt' | 'edge',
@@ -37,33 +37,35 @@ export const markEdges = (grid: Grid<boolean>): WriteGrid<EdgeMarkedMapTile> => 
     return result;
 };
 
-// @ts-ignore
-enum WalkedStatus {
+export enum WalkedStatus {
     Unwalked,
     Walked,
     WalkedImportant,
 }
 
-// @ts-ignore
 interface WalkCandidate {
     dx: number,
     dy: number,
     normal: number,
 }
 
-// @ts-ignore
 interface GridPoint {
     x: number,
     y: number,
 }
 
-export const findContours = (grid: Grid<EdgeMarkedMapTile>, spaceInsurance: 0 | 1 | 2): any => {
+export interface FindContoursResult {
+    contours: Vec2[][],
+    walkMap: WriteGrid<WalkedStatus>,
+}
+
+export const findContours = (grid: Grid<EdgeMarkedMapTile>, spaceInsurance: 0 | 1 | 2): FindContoursResult => {
     const MAX_ITER = 100;
-    const walkMap = new WriteGrid<WalkedStatus>(grid.width, grid.height);
-    const contours: Vec3[][] = [];
+    const walkMap = GridTool.map(new WriteGrid<WalkedStatus>(grid.width, grid.height), _ => WalkedStatus.Unwalked);
+    const contours: Vec2[][] = [];
 
     let iter = 0;
-    let newContour: Vec3[] | null = null;
+    let newContour: Vec2[] | null = null;
 
     do {
         newContour = findOneContour(walkMap, grid, spaceInsurance);
@@ -88,7 +90,27 @@ const findFreshContour = (walkMap: Grid<WalkedStatus>, grid: Grid<EdgeMarkedMapT
     return null;
 };
 
-export const findOneContour = (walkMap: WriteGrid<WalkedStatus>, grid: Grid<EdgeMarkedMapTile>, spaceInsurance: 0 | 1 | 2): Vec3[] | null => {
+const bestCandidate = (prev: WalkCandidate, candidates: WalkCandidate[]): WalkCandidate => {
+    let minVal = 100;
+    let minI = 0;
+
+    for (let i = 0; i < candidates.length; ++i) {
+        const c = candidates[i];
+        const d = Math.abs(smallestDifferenceRadians(
+            c.normal * Math.PI / 180,
+            prev.normal * Math.PI / 180
+        ));
+
+        if (d < minVal) {
+            minVal = d;
+            minI = i;
+        }
+    }
+
+    return candidates[minI];
+};
+
+const findOneContour = (walkMap: WriteGrid<WalkedStatus>, grid: Grid<EdgeMarkedMapTile>, spaceInsurance: 0 | 1 | 2): Vec2[] | null => {
     const MAX_ITER = 5000;
 
     const freshStart = findFreshContour(walkMap, grid);
@@ -96,89 +118,64 @@ export const findOneContour = (walkMap: WriteGrid<WalkedStatus>, grid: Grid<Edge
         return null;
     }
 
-    /*
-    var points = new List<Vector3>();
+    grid = safeOutOfBounds(grid, {kind: 'dirt', normal: 0} as EdgeMarkedMapTile);
 
-    var x = freshStart.Value.x;
-    var y = freshStart.Value.y;
+    const points: Vec2[] = [];
+    let x = freshStart.x;
+    let y = freshStart.y;
 
-    var iter = 0;
-    var lastCan = new WalkCandidate { dx=0, dy=0, normal=0 };
-    var lastStatus = WalkedStatus.Walked;
-    var candidates = new List<WalkCandidate>();
+    let iter = 0;
+    let lastCan: WalkCandidate = { dx: 0, dy: 0, normal: 0 };
+    let lastStatus = WalkedStatus.Walked;
+    let candidates: WalkCandidate[] = [];
 
     do {
-        candidates.Clear();
+        candidates = [];
 
-        for (var dx = -1; dx <= 1; dx++) {
-            for (var dy = -1; dy <= 1; dy++) {
-                if (dx == 0 && dy == 0) continue;
-                if (map[x+dx,y+dy].kind == PixelKind.Edge
-                && walkMap[x+dx,y+dy] == WalkedStatus.Unwalked) {
-                    candidates.Add(new WalkCandidate {dx=dx, dy=dy, normal=map[x+dx,y+dy].normal});
+        for (let dx = -1; dx <= 1; dx++) {
+            for (let dy = -1; dy <= 1; dy++) {
+                if (dx === 0 && dy === 0) continue;
+                if (grid.at(x+dx, y+dy).kind === 'edge'
+                && walkMap.at(x+dx, y+dy) === WalkedStatus.Unwalked) {
+                    candidates.push({dx, dy, normal: grid.at(x+dx, y+dy).normal});
                 }
             }
         }
 
-        if (candidates.Count > 0) {
-            var c = bestCandidate(lastCan, candidates);
+        if (candidates.length > 0) {
+            const c = bestCandidate(lastCan, candidates);
             x += c.dx;
             y += c.dy;
 
-            var newStatus = WalkedStatus.Walked;
-            if (c.normal != lastCan.normal) {
-                bool important;
-                if (spaceInsurance <= 0) {
+            let newStatus = WalkedStatus.Walked;
+            if (c.normal !== lastCan.normal) {
+                let important;
+                if (spaceInsurance === 0) {
                     important = true;
-                } else if (spaceInsurance == 1) {
+                } else if (spaceInsurance === 1) {
                     important = c.dx != 0 && c.dy != 0 || lastStatus != WalkedStatus.WalkedImportant;
-                } else { // spaceInsurance >= 2
+                } else {
                     important = lastStatus != WalkedStatus.WalkedImportant;
                 }
+
                 if (important) {
                     newStatus = WalkedStatus.WalkedImportant;
                 }
             }
 
-            if (newStatus == WalkedStatus.WalkedImportant) {
-                points.Add(new Vector3((float)x/map.width - .5f, (float)y/map.height - .5f, -1f));
+            if (newStatus === WalkedStatus.WalkedImportant) {
+                points.push({
+                    x: (x + 0.5)/grid.width - 0.5,
+                    y: (y + 0.5)/grid.height - 0.5,
+                });
             }
 
-            walkMap[x,y] = newStatus;
+            walkMap.write(x, y, newStatus);
             lastStatus = newStatus;
             lastCan = c;
         }
     }
-    while (candidates.Count > 0 && iter++ < MAX_ITER);
+    while (candidates.length > 0 && iter++ < MAX_ITER);
 
-    return points.ToArray();
-    */
-
-    return null;
+    return points;
 };
-
-    /*
-
-        // spaceInsurance: increased value spreads out contour control points. 0, 1, or 2
-        static WalkCandidate bestCandidate(WalkCandidate prev, IList<WalkCandidate> candidates)
-        {
-            var minVal = 100f;
-            var minI = 0;
-
-            for (int i = 0; i < candidates.Count; ++i) {
-                var c = candidates[i];
-                var d = Mathf.Abs(Angles.SmallestDifference(
-                    c.normal * Mathf.Deg2Rad, prev.normal * Mathf.Deg2Rad
-                ));
-
-                if (d < minVal) {
-                    minVal = d;
-                    minI = i;
-                }
-            }
-
-            return candidates[minI];
-        }
-    }
-
-    */
