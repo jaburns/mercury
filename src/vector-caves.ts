@@ -2,6 +2,7 @@ import { WriteGrid, GridTool } from './grid';
 import { runCellularAutomaton } from './automaton';
 import { markEdges, findContours, WalkedStatus } from './findContours';
 import { smoothCurve } from './smoothCurve';
+import { Vec2, findBounds, RectTool } from './math';
 
 const floodFill = (grid: WriteGrid<number>, x: number, y: number, replace: number, value: number, count: number): number => {
     if (x < 0 || y < 0) return count;
@@ -82,6 +83,8 @@ export const initPost = () :void => {
     const seedSlider = document.getElementById('seed-slider') as HTMLInputElement;
     const popSlider = document.getElementById('pop-slider') as HTMLInputElement;
     const genSlider = document.getElementById('gen-slider') as HTMLInputElement;
+    const insuranceSlider = document.getElementById('insurance-slider') as HTMLInputElement;
+    const curvinessSlider = document.getElementById('curviness-slider') as HTMLInputElement;
 
     const secondCanvas = document.getElementById('second-canvas') as HTMLCanvasElement;
     const ctx2 = secondCanvas.getContext('2d') as CanvasRenderingContext2D;
@@ -100,6 +103,9 @@ export const initPost = () :void => {
 
     const seventhCanvas = document.getElementById('seventh-canvas') as HTMLCanvasElement;
     const ctx7 = seventhCanvas.getContext('2d') as CanvasRenderingContext2D;
+
+    const eighthCanvas = document.getElementById('eighth-canvas') as HTMLCanvasElement;
+    const ctx8 = eighthCanvas.getContext('2d') as CanvasRenderingContext2D;
 
     const update = () :void => {
         const grid = runCellularAutomaton(
@@ -137,7 +143,7 @@ export const initPost = () :void => {
             ctx4.fillRect(4*x, 4*y, 4, 4);
         });
 
-        const contours = findContours(edgeMarkedMap, 1);
+        const contours = findContours(edgeMarkedMap, parseInt(insuranceSlider.value) as any);
 
         GridTool.forEach(contours.walkMap, (x, y, val) => {
             ctx5.fillStyle = val === WalkedStatus.WalkedImportant ? '#fff' : val === WalkedStatus.Walked ? '#333' : '#000';
@@ -147,9 +153,14 @@ export const initPost = () :void => {
             ctx6.fillRect(9*x, 9*y, 9, 9);
         });
 
-        ctx6.strokeStyle = '#f00';
+        const outerIndex = contours.contours
+            .map((c, i) => ({ i, area: RectTool.area(findBounds(c)) }))
+            .sort((a, b) => b.area - a.area)
+            [0].i;
 
-        contours.contours.forEach(c => {
+        contours.contours.forEach((c, i) => {
+            ctx6.strokeStyle = i === outerIndex ? '#f00' : '#933';
+
             for (let i = 0; i < c.length; ++i) {
                 const j = (i + 1) % c.length;
                 const a = { x: 9 * contours.walkMap.width * c[i].x, y: 9 * contours.walkMap.height * c[i].y };
@@ -158,17 +169,20 @@ export const initPost = () :void => {
                 ctx6.beginPath();
                 ctx6.moveTo(9 * contours.walkMap.width / 2 + a.x, 9 * contours.walkMap.height / 2 + a.y);
                 ctx6.lineTo(9 * contours.walkMap.width / 2 + b.x, 9 * contours.walkMap.height / 2 + b.y);
+                // TODO closePath
                 ctx6.stroke();
             }
         });
 
-        const smoothContours = contours.contours.map(x => smoothCurve(x, 10, 1));
+        const smoothContours = contours.contours.map(x => smoothCurve(x, 20, 2 * parseFloat(curvinessSlider.value) / 100));
 
         ctx7.strokeStyle = '#0f0';
         ctx7.fillStyle = '#000';
         ctx7.fillRect(0, 0, 675, 675);
 
-        smoothContours.forEach(c => {
+        smoothContours.forEach((c, i) => {
+            ctx7.strokeStyle = i === outerIndex ? '#0f0' : '#393';
+
             for (let i = 0; i < c.length; ++i) {
                 const j = (i + 1) % c.length;
                 const a = { x: 9 * contours.walkMap.width * c[i].x, y: 9 * contours.walkMap.height * c[i].y };
@@ -177,13 +191,75 @@ export const initPost = () :void => {
                 ctx7.beginPath();
                 ctx7.moveTo(9 * contours.walkMap.width / 2 + a.x, 9 * contours.walkMap.height / 2 + a.y);
                 ctx7.lineTo(9 * contours.walkMap.width / 2 + b.x, 9 * contours.walkMap.height / 2 + b.y);
+                // TODO closePath
                 ctx7.stroke();
             }
+        });
+
+        // TODO find closest point to the actual OOB point we're making the seam to.
+        const mostTopLeft = (pts: Vec2[]): number =>
+            pts.map((p, i) => ({ i, len: (p.x+0.5)*(p.x+0.5) + (p.y+0.5)*(p.y+0.5) }))
+                .sort((a, b) => a.len - b.len)
+                [0].i;
+
+        const topLeftPtI = mostTopLeft(smoothContours[outerIndex]);
+        const topLeftPt = smoothContours[outerIndex][topLeftPtI];
+
+        ctx7.strokeStyle = '#0f0';
+        ctx7.beginPath();
+        ctx7.moveTo(
+            9 * contours.walkMap.width / 2 + 9 * contours.walkMap.width * topLeftPt.x,
+            9 * contours.walkMap.height / 2 + 9 * contours.walkMap.height * topLeftPt.y,
+        );
+        ctx7.lineTo(
+            -9 * contours.walkMap.width / 2,
+            -9 * contours.walkMap.height / 2
+        );
+        ctx7.stroke();
+
+        ctx7.strokeStyle = '#9f9';
+        ctx7.beginPath();
+        ctx7.arc(
+            9 * contours.walkMap.width / 2 + 9 * contours.walkMap.width * topLeftPt.x,
+            9 * contours.walkMap.height / 2 + 9 * contours.walkMap.height * topLeftPt.y,
+            5, 0, 2*Math.PI);
+        ctx7.stroke();
+
+        // =--------------------------------------------
+
+        smoothContours[outerIndex].splice(topLeftPtI, 0,
+            topLeftPt,
+            {x: -1.5, y: -1.5},
+            {x: -1.5, y:  1.5},
+            {x:  1.5, y:  1.5},
+            {x:  1.5, y: -1.5},
+            {x: -1.5, y: -1.5});
+
+        // =--------------------------------------------
+
+        ctx8.fillStyle = '#000';
+        ctx8.fillRect(0, 0, 675, 675);
+        //ctx8.strokeStyle = '';
+
+
+        smoothContours.forEach((c, i) => {
+            ctx8.fillStyle = i === outerIndex ? '#0f0' : '#393';
+
+            ctx8.beginPath();
+            const a = { x: 9 * contours.walkMap.width * c[i].x, y: 9 * contours.walkMap.height * c[i].y };
+            ctx8.moveTo(9 * contours.walkMap.width / 2 + a.x, 9 * contours.walkMap.height / 2 + a.y);
+
+            for (let i = 1; i < c.length; ++i) {
+                const b = { x: 9 * contours.walkMap.width * c[i].x, y: 9 * contours.walkMap.height * c[i].y };
+                ctx8.lineTo(9 * contours.walkMap.width / 2 + b.x, 9 * contours.walkMap.height / 2 + b.y);
+            }
+
+            ctx8.fill();
         });
     };
 
     multibind(
-        [popSlider, genSlider, seedSlider],
+        [popSlider, genSlider, seedSlider, insuranceSlider, curvinessSlider],
         ['oninput', 'onchange'],
         update
     );

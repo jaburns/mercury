@@ -71,6 +71,7 @@
             <div class="canvas-holder">
                 <canvas id="fifth-canvas" width="300" height="300"></canvas>
             </div>
+            <p><input id="insurance-slider" type="range" min="0" max="2" step="1" value="1"></p>
 
             <p>
             Now let's blow this up and draw some lines between the "important" points we found.
@@ -81,12 +82,30 @@
             </div>
 
             <p>
-            Then we'll use some kind of an algorithm or something to make this better.
+            Then we'll use <a href="http://www.antigrain.com/research/bezier_interpolation/">some
+            kind of an algorithm or something</a> to make this better. Once we've got our nice smooth
+            cave world, let's find the point that's closest to the top left and mark it. We'll make a
+            seam from here to a large bounding box around the outside so that we can fill the outer
+            ground area.
             </p>
 
             <div class="canvas-holder">
                 <canvas id="seventh-canvas" width="675" height="675"></canvas>
             </div>
+
+            <p>
+            Here's another unlabeled slider bound to the parameter of a random function:
+            </p>
+            <p><input id="curviness-slider" type="range" min="0" max="100" step="1" value="50"></p>
+
+            <p>
+            And here's our filled in cave:
+            </p>
+
+            <div class="canvas-holder">
+                <canvas id="eighth-canvas" width="675" height="675"></canvas>
+            </div>
+
 
             <br /> <br /> <br /> <br /> <br /> <br />
             <br /> <br /> <br /> <br /> <br /> <br />

@@ -3,6 +3,13 @@ export interface Vec2 {
     y: number,
 }
 
+export interface Rect {
+    xmin: number,
+    ymin: number,
+    xmax: number,
+    ymax: number,
+}
+
 export const V2 = {
     add: (a: Vec2, b: Vec2): void => {
         a.x += b.x;
@@ -28,6 +35,11 @@ export const V2 = {
     }),
 };
 
+export const RectTool = {
+    area: (r: Rect): number =>
+        (r.xmax - r.xmin) * (r.ymax - r.ymin),
+};
+
 export const smallestDifferenceRadians = (a: number, b: number): number => {
     a %= 2 * Math.PI;
     b %= 2 * Math.PI;
@@ -38,4 +50,17 @@ export const smallestDifferenceRadians = (a: number, b: number): number => {
     }
 
     return a - b;
-}
+};
+
+export const findBounds = (pts: Vec2[]): Rect => {
+    const result: Rect = { xmin: Infinity, ymin: Infinity, xmax: -Infinity, ymax: -Infinity };
+
+    pts.forEach(p => {
+        if (p.x < result.xmin) result.xmin = p.x;
+        if (p.y < result.ymin) result.ymin = p.y;
+        if (p.x > result.xmax) result.xmax = p.x;
+        if (p.y > result.ymax) result.ymax = p.y;
+    });
+
+    return result;
+};
