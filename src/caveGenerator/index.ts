@@ -1,8 +1,8 @@
-import { WriteGrid, GridTool } from './grid';
+import { WriteGrid, GridTool, safeOutOfBounds } from 'utils/grid';
 import { runCellularAutomaton } from './automaton';
 import { markEdges, findContours, WalkedStatus } from './findContours';
 import { smoothCurve } from './smoothCurve';
-import { Vec2, findBounds, RectTool } from './math';
+import { Vec2, findBounds, RectTool } from 'utils/math';
 import { triangulate } from './triangulate';
 
 const floodFill = (grid: WriteGrid<number>, x: number, y: number, replace: number, value: number, count: number): number => {
@@ -22,6 +22,20 @@ const floodFill = (grid: WriteGrid<number>, x: number, y: number, replace: numbe
     count = floodFill(grid, x, y - 1, replace, value, count);
     count = floodFill(grid, x, y + 1, replace, value, count);
     return count;
+};
+
+const fixSingleTileBridges = (grid: WriteGrid<boolean>): void => {
+    GridTool.forEach(safeOutOfBounds(grid, true), (x, y, val) => {
+        if (!val) return;
+
+        if (val && !grid.at(x - 1, y) && !grid.at(x + 1, y)) {
+            grid.write(x + 1, y, true);
+        }
+
+        if (val && !grid.at(x, y - 1) && !grid.at(x, y + 1)) {
+            grid.write(x, y + 1, true);
+        }
+    });
 };
 
 const colorGridRegions = (grid: WriteGrid<number>): number => {
@@ -44,17 +58,22 @@ const colorGridRegions = (grid: WriteGrid<number>): number => {
     }
 };
 
+const randomColorHex = (): string => {
+    const randPair = (): string => {
+        let ret = Math.floor(Math.random() * 256).toString(16);
+        if (ret.length < 2) ret = '0'+ret;
+        return ret;
+    };
+
+    return '#' + randPair() + randPair() + randPair();
+};
+
+const colors = [0,0,0,0,0,0,0,0,0,0].map(_ => randomColorHex());
+
+
 const gridColorForNumber = (n: number): string => {
     if (n < 0) return '#000';
-    switch (n % 6) {
-        case  0: return '#F00';
-        case  1: return '#0F0';
-        case  2: return '#00F';
-        case  3: return '#0FF';
-        case  4: return '#F0F';
-        case  5: return '#FF0';
-    }
-    return '';
+    return colors[n % colors.length];
 };
 
 const gridColorForNormal = (degs: number): string => {
@@ -86,6 +105,7 @@ export const initPost = () :void => {
     const genSlider = document.getElementById('gen-slider') as HTMLInputElement;
     const insuranceSlider = document.getElementById('insurance-slider') as HTMLInputElement;
     const curvinessSlider = document.getElementById('curviness-slider') as HTMLInputElement;
+    const qualitySlider = document.getElementById('quality-slider') as HTMLInputElement;
 
     const secondCanvas = document.getElementById('second-canvas') as HTMLCanvasElement;
     const ctx2 = secondCanvas.getContext('2d') as CanvasRenderingContext2D;
@@ -135,6 +155,8 @@ export const initPost = () :void => {
 
         const filledMap = GridTool.map(coloredGrid, (x, y, val) => val !== bigColor);
 
+        fixSingleTileBridges(filledMap);
+
         GridTool.forEach(filledMap, (x, y, val) => {
             ctx3.fillStyle = val ? '#000' : '#FFF';
             ctx3.fillRect(4*x, 4*y, 4, 4);
@@ -178,7 +200,7 @@ export const initPost = () :void => {
             }
         });
 
-        const smoothContours = contours.contours.map(x => smoothCurve(x, 2, 2 * parseFloat(curvinessSlider.value) / 100));
+        const smoothContours = contours.contours.map(x => smoothCurve(x, parseFloat(qualitySlider.value), 2 * parseFloat(curvinessSlider.value) / 100));
 
         ctx7.strokeStyle = '#0f0';
         ctx7.fillStyle = '#000';
@@ -208,6 +230,7 @@ export const initPost = () :void => {
 
         const topLeftPtI = mostTopLeft(smoothContours[outerIndex]);
         const topLeftPt = smoothContours[outerIndex][topLeftPtI];
+        const topLeftPrevPt = smoothContours[outerIndex][topLeftPtI === 0 ? smoothContours[outerIndex].length - 1 : topLeftPtI - 1];
 
         ctx7.strokeStyle = '#0f0';
         ctx7.beginPath();
@@ -231,16 +254,24 @@ export const initPost = () :void => {
 
         // =--------------------------------------------
 
-        const OUT = 0.6;
-        const OFFSET = 0.00001;
+        const OUT = 0.51;
+        const bumpDownAmount = Math.abs(topLeftPt.y - topLeftPrevPt.y);
 
         smoothContours[outerIndex].splice(topLeftPtI, 0,
-            {x: topLeftPt.x-OFFSET, y: topLeftPt.y-OFFSET },
-            {x: -OUT-OFFSET, y: -OUT-OFFSET},
+            {x: -OUT, y: -OUT+bumpDownAmount},
             {x: -OUT, y:  OUT},
             {x:  OUT, y:  OUT},
             {x:  OUT, y: -OUT},
-            {x: -OUT, y: -OUT});
+            {x: -OUT, y: -OUT},
+            {x: (topLeftPt.x + topLeftPrevPt.x) / 2, 
+             y: (topLeftPt.y + topLeftPrevPt.y) / 2}
+        );
+
+        const tris = smoothContours.map(triangulate);
+
+        smoothContours[outerIndex][topLeftPtI].y -= bumpDownAmount;
+        smoothContours[outerIndex][topLeftPtI+5].x = topLeftPrevPt.x;
+        smoothContours[outerIndex][topLeftPtI+5].y = topLeftPrevPt.y;
 
         // =--------------------------------------------
 
@@ -251,11 +282,11 @@ export const initPost = () :void => {
             ctx8.fillStyle = i === outerIndex ? '#0f0' : '#393';
 
             ctx8.beginPath();
-            const a = { x: 9 * contours.walkMap.width * c[i].x, y: 9 * contours.walkMap.height * c[i].y };
+            const a = { x: 9 * contours.walkMap.width * c[0].x, y: 9 * contours.walkMap.height * c[0].y };
             ctx8.moveTo(9 * contours.walkMap.width / 2 + a.x, 9 * contours.walkMap.height / 2 + a.y);
 
-            for (let i = 1; i < c.length; ++i) {
-                const b = { x: 9 * contours.walkMap.width * c[i].x, y: 9 * contours.walkMap.height * c[i].y };
+            for (let j = 1; j < c.length; ++j) {
+                const b = { x: 9 * contours.walkMap.width * c[j].x, y: 9 * contours.walkMap.height * c[j].y };
                 ctx8.lineTo(9 * contours.walkMap.width / 2 + b.x, 9 * contours.walkMap.height / 2 + b.y);
             }
 
@@ -266,36 +297,35 @@ export const initPost = () :void => {
 
         ctx9.fillStyle = '#000';
         ctx9.fillRect(0, 0, 675, 675);
-        ctx9.strokeStyle = '#fff';
 
-        const tris = smoothContours.map(triangulate);
         tris.forEach((ts,j) => {
             for (let i = 0; i < ts.length - 2; i += 3) {
+                ctx9.fillStyle = randomColorHex();
                 ctx9.beginPath();
                 {
                     const c = smoothContours[j][ts[i]];
-                    const a = { x: 7 * contours.walkMap.width * c.x, y: 7 * contours.walkMap.height * c.y };
+                    const a = { x: 8 * contours.walkMap.width * c.x, y: 8 * contours.walkMap.height * c.y };
                     ctx9.moveTo(9 * contours.walkMap.width / 2 + a.x, 9 * contours.walkMap.height / 2 + a.y);
                 } {
                     const c = smoothContours[j][ts[i+1]];
-                    const a = { x: 7 * contours.walkMap.width * c.x, y: 7 * contours.walkMap.height * c.y };
+                    const a = { x: 8 * contours.walkMap.width * c.x, y: 8 * contours.walkMap.height * c.y };
                     ctx9.lineTo(9 * contours.walkMap.width / 2 + a.x, 9 * contours.walkMap.height / 2 + a.y);
                 } {
                     const c = smoothContours[j][ts[i+2]];
-                    const a = { x: 7 * contours.walkMap.width * c.x, y: 7 * contours.walkMap.height * c.y };
+                    const a = { x: 8 * contours.walkMap.width * c.x, y: 8 * contours.walkMap.height * c.y };
                     ctx9.lineTo(9 * contours.walkMap.width / 2 + a.x, 9 * contours.walkMap.height / 2 + a.y);
                 } {
                     const c = smoothContours[j][ts[i]];
-                    const a = { x: 7 * contours.walkMap.width * c.x, y: 7 * contours.walkMap.height * c.y };
+                    const a = { x: 8 * contours.walkMap.width * c.x, y: 8 * contours.walkMap.height * c.y };
                     ctx9.lineTo(9 * contours.walkMap.width / 2 + a.x, 9 * contours.walkMap.height / 2 + a.y);
                 }
-                ctx9.stroke();
+                ctx9.fill();
             }
         });
     };
 
     multibind(
-        [popSlider, genSlider, seedSlider, insuranceSlider, curvinessSlider],
+        [popSlider, genSlider, seedSlider, insuranceSlider, curvinessSlider, qualitySlider],
         ['oninput', 'onchange'],
         update
     );

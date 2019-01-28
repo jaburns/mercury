@@ -1,4 +1,4 @@
-import { Vec2 } from './math';
+import { Vec2 } from 'utils/math';
 
 export const triangulate = (points: Vec2[]): number[] => {
     const indices: number[] = [];

@@ -1,4 +1,4 @@
-import { Vec2, V2 } from "./math";
+import { Vec2, V2 } from 'utils/math';
 
 interface Pt {
     pt: Vec2,
@@ -40,7 +40,7 @@ export const smoothCurve = (input: Vec2[], resolution: number, curviness: number
         const curr = pts[i];
         const next = pts[(i + 1) % pts.length];
 
-        for (let t = 0; t < 1; t += inc) {
+        for (let t = 0; t < 1 - (inc / 2); t += inc) {
             let newVal: Vec2 = { x: 0, y: 0 };
 
             V2.add(newVal, V2.scaled(curr.pt       , (1-t)*(1-t)*(1-t)));

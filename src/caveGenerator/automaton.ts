@@ -1,5 +1,5 @@
-import { nextRandom01 } from './prng';
-import { WriteGrid, Grid } from './grid';
+import { nextRandom01 } from 'utils/prng';
+import { WriteGrid, Grid } from 'utils/grid';
 
 const getNeighborhood = (map: Grid<boolean>, x: number, y: number): number => {
     let result: number = 0;

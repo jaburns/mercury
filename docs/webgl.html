@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>jaburns.net - Vector Caves</title>
+        <link rel="stylesheet" type="text/css" href="style.css" />
+        <style>
+            .canvas-holder {
+                text-align: center;
+            }
+            canvas {
+                display: inline-block;
+                border: 10px solid #29211c;
+                background-color: white;
+            }
+            input { 
+                margin: auto;
+                display: block;
+                width: 300px;
+            }
+        </style>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body>
+        <main class="contents">
+            <div class="title">Generating vector caves from cellular automata</div>
+
+            <p>Let's make a little shooter game in a procedurally generated cave. 
+            We'll start off by using a 2D cellular automaton to generate a cave shape.
+            <a href="https://blog.jrheard.com/procedural-dungeon-generation-cellular-automata" >
+            This blog post does a great job of describing the technique.</a> 
+            </p>
+
+            <div class="canvas-holder">
+                <canvas id="first-canvas" width="300" height="300"></canvas>
+            </div>
+
+            <br /> <br /> <br /> <br /> <br /> <br />
+            <br /> <br /> <br /> <br /> <br /> <br />
+            <br /> <br /> <br /> <br /> <br /> <br />
+        </main>
+    </body>
+    <script type="text/javascript" src="bundle.js"></script>
+    <script type="text/javascript"> initPost('page2-webgl'); </script>
+</html>

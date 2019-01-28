@@ -1,5 +1,5 @@
-import { Grid, WriteGrid, GridTool, safeOutOfBounds } from './grid';
-import { Vec2, smallestDifferenceRadians } from './math';
+import { Grid, WriteGrid, GridTool, safeOutOfBounds } from 'utils/grid';
+import { Vec2, smallestDifferenceRadians } from 'utils/math';
 
 export interface EdgeMarkedMapTile {
     kind: 'air' | 'dirt' | 'edge',
@@ -77,7 +77,6 @@ export const findContours = (grid: Grid<EdgeMarkedMapTile>, spaceInsurance: 0 | 
     return { contours, walkMap };
 }
 
-// @ts-ignore
 const findFreshContour = (walkMap: Grid<WalkedStatus>, grid: Grid<EdgeMarkedMapTile>): GridPoint | null => {
     for (let x = 0; x < grid.width; x++) {
         for (let y = 0; y < grid.height; y++) {
