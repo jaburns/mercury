@@ -178,7 +178,7 @@ export const initPost = () :void => {
             }
         });
 
-        const smoothContours = contours.contours.map(x => smoothCurve(x, 20, 2 * parseFloat(curvinessSlider.value) / 100));
+        const smoothContours = contours.contours.map(x => smoothCurve(x, 2, 2 * parseFloat(curvinessSlider.value) / 100));
 
         ctx7.strokeStyle = '#0f0';
         ctx7.fillStyle = '#000';
@@ -231,13 +231,16 @@ export const initPost = () :void => {
 
         // =--------------------------------------------
 
+        const OUT = 0.6;
+        const OFFSET = 0.00001;
+
         smoothContours[outerIndex].splice(topLeftPtI, 0,
-            {x: topLeftPt.x-0.0001, y: topLeftPt.y-0.0001 },
-            {x: -1.5001, y: -1.5001},
-            {x: -1.5, y:  1.5},
-            {x:  1.5, y:  1.5},
-            {x:  1.5, y: -1.5},
-            {x: -1.5, y: -1.5});
+            {x: topLeftPt.x-OFFSET, y: topLeftPt.y-OFFSET },
+            {x: -OUT-OFFSET, y: -OUT-OFFSET},
+            {x: -OUT, y:  OUT},
+            {x:  OUT, y:  OUT},
+            {x:  OUT, y: -OUT},
+            {x: -OUT, y: -OUT});
 
         // =--------------------------------------------
 
@@ -271,22 +274,19 @@ export const initPost = () :void => {
                 ctx9.beginPath();
                 {
                     const c = smoothContours[j][ts[i]];
-                    const a = { x: 2.1 * contours.walkMap.width * c.x, y: 2.1 * contours.walkMap.height * c.y };
+                    const a = { x: 7 * contours.walkMap.width * c.x, y: 7 * contours.walkMap.height * c.y };
                     ctx9.moveTo(9 * contours.walkMap.width / 2 + a.x, 9 * contours.walkMap.height / 2 + a.y);
-                }
-                {
+                } {
                     const c = smoothContours[j][ts[i+1]];
-                    const a = { x: 2.1 * contours.walkMap.width * c.x, y: 2.1 * contours.walkMap.height * c.y };
+                    const a = { x: 7 * contours.walkMap.width * c.x, y: 7 * contours.walkMap.height * c.y };
                     ctx9.lineTo(9 * contours.walkMap.width / 2 + a.x, 9 * contours.walkMap.height / 2 + a.y);
-                }
-                {
+                } {
                     const c = smoothContours[j][ts[i+2]];
-                    const a = { x: 2.1 * contours.walkMap.width * c.x, y: 2.1 * contours.walkMap.height * c.y };
+                    const a = { x: 7 * contours.walkMap.width * c.x, y: 7 * contours.walkMap.height * c.y };
                     ctx9.lineTo(9 * contours.walkMap.width / 2 + a.x, 9 * contours.walkMap.height / 2 + a.y);
-                }
-                {
+                } {
                     const c = smoothContours[j][ts[i]];
-                    const a = { x: 2.1 * contours.walkMap.width * c.x, y: 2.1 * contours.walkMap.height * c.y };
+                    const a = { x: 7 * contours.walkMap.width * c.x, y: 7 * contours.walkMap.height * c.y };
                     ctx9.lineTo(9 * contours.walkMap.width / 2 + a.x, 9 * contours.walkMap.height / 2 + a.y);
                 }
                 ctx9.stroke();
