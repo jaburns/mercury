@@ -3,6 +3,7 @@ import { runCellularAutomaton } from './automaton';
 import { markEdges, findContours, WalkedStatus } from './findContours';
 import { smoothCurve } from './smoothCurve';
 import { Vec2, findBounds, RectTool } from './math';
+import { triangulate } from './triangulate';
 
 const floodFill = (grid: WriteGrid<number>, x: number, y: number, replace: number, value: number, count: number): number => {
     if (x < 0 || y < 0) return count;
@@ -106,6 +107,9 @@ export const initPost = () :void => {
 
     const eighthCanvas = document.getElementById('eighth-canvas') as HTMLCanvasElement;
     const ctx8 = eighthCanvas.getContext('2d') as CanvasRenderingContext2D;
+
+    const ninthCanvas = document.getElementById('ninth-canvas') as HTMLCanvasElement;
+    const ctx9 = ninthCanvas.getContext('2d') as CanvasRenderingContext2D;
 
     const update = () :void => {
         const grid = runCellularAutomaton(
@@ -228,8 +232,8 @@ export const initPost = () :void => {
         // =--------------------------------------------
 
         smoothContours[outerIndex].splice(topLeftPtI, 0,
-            topLeftPt,
-            {x: -1.5, y: -1.5},
+            {x: topLeftPt.x-0.0001, y: topLeftPt.y-0.0001 },
+            {x: -1.5001, y: -1.5001},
             {x: -1.5, y:  1.5},
             {x:  1.5, y:  1.5},
             {x:  1.5, y: -1.5},
@@ -239,8 +243,6 @@ export const initPost = () :void => {
 
         ctx8.fillStyle = '#000';
         ctx8.fillRect(0, 0, 675, 675);
-        //ctx8.strokeStyle = '';
-
 
         smoothContours.forEach((c, i) => {
             ctx8.fillStyle = i === outerIndex ? '#0f0' : '#393';
@@ -255,6 +257,40 @@ export const initPost = () :void => {
             }
 
             ctx8.fill();
+        });
+
+        // =--------------------------------------------
+
+        ctx9.fillStyle = '#000';
+        ctx9.fillRect(0, 0, 675, 675);
+        ctx9.strokeStyle = '#fff';
+
+        const tris = smoothContours.map(triangulate);
+        tris.forEach((ts,j) => {
+            for (let i = 0; i < ts.length - 2; i += 3) {
+                ctx9.beginPath();
+                {
+                    const c = smoothContours[j][ts[i]];
+                    const a = { x: 2.1 * contours.walkMap.width * c.x, y: 2.1 * contours.walkMap.height * c.y };
+                    ctx9.moveTo(9 * contours.walkMap.width / 2 + a.x, 9 * contours.walkMap.height / 2 + a.y);
+                }
+                {
+                    const c = smoothContours[j][ts[i+1]];
+                    const a = { x: 2.1 * contours.walkMap.width * c.x, y: 2.1 * contours.walkMap.height * c.y };
+                    ctx9.lineTo(9 * contours.walkMap.width / 2 + a.x, 9 * contours.walkMap.height / 2 + a.y);
+                }
+                {
+                    const c = smoothContours[j][ts[i+2]];
+                    const a = { x: 2.1 * contours.walkMap.width * c.x, y: 2.1 * contours.walkMap.height * c.y };
+                    ctx9.lineTo(9 * contours.walkMap.width / 2 + a.x, 9 * contours.walkMap.height / 2 + a.y);
+                }
+                {
+                    const c = smoothContours[j][ts[i]];
+                    const a = { x: 2.1 * contours.walkMap.width * c.x, y: 2.1 * contours.walkMap.height * c.y };
+                    ctx9.lineTo(9 * contours.walkMap.width / 2 + a.x, 9 * contours.walkMap.height / 2 + a.y);
+                }
+                ctx9.stroke();
+            }
         });
     };
 
