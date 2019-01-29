@@ -1,6 +1,7 @@
 import { generateCaveVerbose, CaveGeneratorConfig } from 'caveGenerator';
 import { GridTool } from 'utils/grid';
 import { WalkedStatus } from 'caveGenerator/findContours';
+import { Vec2 } from 'utils/math';
 
 const randomColorHex = (): string => {
     const randPair = (): string => {
@@ -66,9 +67,6 @@ export const initPost = () :void => {
     const seventhCanvas = document.getElementById('seventh-canvas') as HTMLCanvasElement;
     const ctx7 = seventhCanvas.getContext('2d') as CanvasRenderingContext2D;
 
-    const eighthCanvas = document.getElementById('eighth-canvas') as HTMLCanvasElement;
-    const ctx8 = eighthCanvas.getContext('2d') as CanvasRenderingContext2D;
-
     const ninthCanvas = document.getElementById('ninth-canvas') as HTMLCanvasElement;
     const ctx9 = ninthCanvas.getContext('2d') as CanvasRenderingContext2D;
 
@@ -112,112 +110,71 @@ export const initPost = () :void => {
             ctx6.fillRect(9*x, 9*y, 9, 9);
         });
 
+        const BIG_CANVAS_SIZE = 675;
+
+        const curveSpaceToCanvasSpace = (pt: Vec2): Vec2 => ({ 
+            x: (BIG_CANVAS_SIZE / 2) * (1 + pt.x),
+            y: (BIG_CANVAS_SIZE / 2) * (1 + pt.y)
+        });
+
         // =--------------------------------------------
 
         contours.contours.forEach((c, i) => {
             ctx6.strokeStyle = i === details.outerMostContourIndex ? '#f00' : '#933';
 
-            for (let i = 0; i < c.length; ++i) {
-                const j = (i + 1) % c.length;
-                const a = { x: 9 * contours.walkMap.width * c[i].x, y: 9 * contours.walkMap.height * c[i].y };
-                const b = { x: 9 * contours.walkMap.width * c[j].x, y: 9 * contours.walkMap.height * c[j].y };
-                
-                ctx6.beginPath();
-                ctx6.moveTo(9 * contours.walkMap.width / 2 + a.x, 9 * contours.walkMap.height / 2 + a.y);
-                ctx6.lineTo(9 * contours.walkMap.width / 2 + b.x, 9 * contours.walkMap.height / 2 + b.y);
-                ctx6.stroke(); // TODO closePath
+            ctx6.beginPath();
+            const first = curveSpaceToCanvasSpace(c[0]);
+            ctx6.moveTo(first.x, first.y);
+
+            for (let i = 1; i < c.length; ++i) {
+                const next = curveSpaceToCanvasSpace(c[i]);
+                ctx6.lineTo(next.x, next.y);
             }
+
+            ctx6.closePath();
+            ctx6.stroke();
         });
 
         // =--------------------------------------------
 
         ctx7.strokeStyle = '#0f0';
         ctx7.fillStyle = '#000';
-        ctx7.fillRect(0, 0, 675, 675);
+        ctx7.fillRect(0, 0, BIG_CANVAS_SIZE, BIG_CANVAS_SIZE);
 
         cave.edges.forEach((c, i) => {
             ctx7.strokeStyle = i === details.outerMostContourIndex ? '#0f0' : '#393';
 
-            for (let i = 0; i < c.length; ++i) {
-                const j = (i + 1) % c.length;
-                const a = { x: 9 * contours.walkMap.width * c[i].x, y: 9 * contours.walkMap.height * c[i].y };
-                const b = { x: 9 * contours.walkMap.width * c[j].x, y: 9 * contours.walkMap.height * c[j].y };
-                
-                ctx7.beginPath();
-                ctx7.moveTo(9 * contours.walkMap.width / 2 + a.x, 9 * contours.walkMap.height / 2 + a.y);
-                ctx7.lineTo(9 * contours.walkMap.width / 2 + b.x, 9 * contours.walkMap.height / 2 + b.y);
-                ctx7.stroke(); // TODO closePath
-            }
-        });
+            ctx7.beginPath();
+            const first = curveSpaceToCanvasSpace(c[0]);
+            ctx7.moveTo(first.x, first.y);
 
-        const topLeftPt = cave.edges[details.outerMostContourIndex][details.topLeftMostVertexIndex];
-
-        ctx7.strokeStyle = '#0f0';
-        ctx7.beginPath();
-        ctx7.moveTo(
-            9 * contours.walkMap.width / 2 + 9 * contours.walkMap.width * topLeftPt.x,
-            9 * contours.walkMap.height / 2 + 9 * contours.walkMap.height * topLeftPt.y,
-        );
-        ctx7.lineTo(
-            -9 * contours.walkMap.width / 2,
-            -9 * contours.walkMap.height / 2
-        );
-        ctx7.stroke();
-
-        ctx7.strokeStyle = '#9f9';
-        ctx7.beginPath();
-        ctx7.arc(
-            9 * contours.walkMap.width / 2 + 9 * contours.walkMap.width * topLeftPt.x,
-            9 * contours.walkMap.height / 2 + 9 * contours.walkMap.height * topLeftPt.y,
-            5, 0, 2*Math.PI);
-        ctx7.stroke();
-
-        // =--------------------------------------------
-
-        ctx8.fillStyle = '#000';
-        ctx8.fillRect(0, 0, 675, 675);
-
-        cave.edges.forEach((c, i) => {
-            ctx8.fillStyle = i === details.outerMostContourIndex ? '#0f0' : '#393';
-
-            ctx8.beginPath();
-            const a = { x: 9 * contours.walkMap.width * c[0].x, y: 9 * contours.walkMap.height * c[0].y };
-            ctx8.moveTo(9 * contours.walkMap.width / 2 + a.x, 9 * contours.walkMap.height / 2 + a.y);
-
-            for (let j = 1; j < c.length; ++j) {
-                const b = { x: 9 * contours.walkMap.width * c[j].x, y: 9 * contours.walkMap.height * c[j].y };
-                ctx8.lineTo(9 * contours.walkMap.width / 2 + b.x, 9 * contours.walkMap.height / 2 + b.y);
+            for (let i = 1; i < c.length; ++i) {
+                const next = curveSpaceToCanvasSpace(c[i]);
+                ctx7.lineTo(next.x, next.y);
             }
 
-            ctx8.fill();
+            ctx7.closePath();
+            ctx7.stroke();
         });
 
         // =--------------------------------------------
 
         ctx9.fillStyle = '#000';
-        ctx9.fillRect(0, 0, 675, 675);
+        ctx9.fillRect(0, 0, BIG_CANVAS_SIZE, BIG_CANVAS_SIZE);
 
         cave.triangles.forEach((ts,j) => {
             for (let i = 0; i < ts.length - 2; i += 3) {
                 ctx9.fillStyle = randomColorHex();
                 ctx9.beginPath();
-                {
-                    const c = cave.edges[j][ts[i]];
-                    const a = { x: 8 * contours.walkMap.width * c.x, y: 8 * contours.walkMap.height * c.y };
-                    ctx9.moveTo(9 * contours.walkMap.width / 2 + a.x, 9 * contours.walkMap.height / 2 + a.y);
-                } {
-                    const c = cave.edges[j][ts[i+1]];
-                    const a = { x: 8 * contours.walkMap.width * c.x, y: 8 * contours.walkMap.height * c.y };
-                    ctx9.lineTo(9 * contours.walkMap.width / 2 + a.x, 9 * contours.walkMap.height / 2 + a.y);
-                } {
-                    const c = cave.edges[j][ts[i+2]];
-                    const a = { x: 8 * contours.walkMap.width * c.x, y: 8 * contours.walkMap.height * c.y };
-                    ctx9.lineTo(9 * contours.walkMap.width / 2 + a.x, 9 * contours.walkMap.height / 2 + a.y);
-                } {
-                    const c = cave.edges[j][ts[i]];
-                    const a = { x: 8 * contours.walkMap.width * c.x, y: 8 * contours.walkMap.height * c.y };
-                    ctx9.lineTo(9 * contours.walkMap.width / 2 + a.x, 9 * contours.walkMap.height / 2 + a.y);
-                }
+
+                const first = curveSpaceToCanvasSpace(cave.edges[j][ts[i]]);
+                ctx9.moveTo(first.x, first.y);
+
+                [1, 2, 0].forEach(o => {
+                    const a = curveSpaceToCanvasSpace(cave.edges[j][ts[i+o]]);
+                    ctx9.lineTo(a.x, a.y);
+                })
+
                 ctx9.fill();
             }
         });

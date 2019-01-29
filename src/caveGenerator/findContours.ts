@@ -164,8 +164,8 @@ const findOneContour = (walkMap: WriteGrid<WalkedStatus>, grid: Grid<EdgeMarkedM
 
             if (newStatus === WalkedStatus.WalkedImportant) {
                 points.push({
-                    x: (x + 0.5)/grid.width - 0.5,
-                    y: (y + 0.5)/grid.height - 0.5,
+                    x: 2*(x + 0.5)/grid.width - 1,
+                    y: 2*(y + 0.5)/grid.height - 1,
                 });
             }
 

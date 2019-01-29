@@ -103,7 +103,7 @@ export const generateCaveVerbose = (config: CaveGeneratorConfig): { cave: Cave, 
 
     const smoothContours = findContoursResult.contours.map(x => smoothCurve(x, config.curveQuality, config.curveBend));
 
-    const BOUNDS = 0.51;
+    const BOUNDS = 1.0;
 
     const mostTopLeft = (pts: Vec2[]): number =>
         pts.map((p, i) => ({ i, len: (p.x+BOUNDS)*(p.x+BOUNDS) + (p.y+BOUNDS)*(p.y+BOUNDS) }))

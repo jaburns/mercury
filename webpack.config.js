@@ -11,7 +11,7 @@ module.exports = {
     },
     resolve: {
         extensions: ['.js', '.ts'],
-        modules: [ __dirname+'/src' ]
+        modules: [ __dirname+'/src', 'node_modules' ]
     },
     module: {
         rules: [{ test: /\.ts$/, loader: 'awesome-typescript-loader' }]

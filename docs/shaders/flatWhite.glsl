@@ -1,10 +1,10 @@
 #ifdef VERTEX
 
-    layout(location = 0) in vec3 c;
+    layout(location = 0) in vec2 position;
 
     void main()
     {
-        gl_Position = vec4(2.*c, 1);
+        gl_Position = vec4(position, 0, 1);
     }
 
 #endif
