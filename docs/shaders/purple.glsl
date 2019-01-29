@@ -1,10 +1,10 @@
 #ifdef VERTEX
 
-    in vec3 c;
+    layout(location = 0) in vec3 c;
 
     void main()
     {
-        gl_Position = vec4(c, 1);
+        gl_Position = vec4(2.*c, 1);
     }
 
 #endif
@@ -14,7 +14,7 @@
 
     void main()
     {
-        f_color = vec4(1, 0, 1, 1);
+        f_color = vec4(1, 1, 1, 1);
     }
 
 #endif

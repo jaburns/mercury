@@ -1,8 +1,5 @@
-uniform sampler2D tex;
-
-v2f vec2 uv;
-
-vec4 blur13(sampler2D image, vec2 uv, vec2 resolution, vec2 direction) {
+vec4 blur13(sampler2D image, vec2 uv, vec2 resolution, vec2 direction)
+{
     vec4 color = vec4(0.0);
     vec2 off1 = vec2(1.411764705882353) * direction;
     vec2 off2 = vec2(3.2941176470588234) * direction;
@@ -17,9 +14,13 @@ vec4 blur13(sampler2D image, vec2 uv, vec2 resolution, vec2 direction) {
     return color;
 }
 
+uniform sampler2D tex;
+
+v2f vec2 uv;
+
 #ifdef VERTEX
 
-    in vec3 c;
+    layout(location = 0) in vec3 c;
 
     void main()
     {
@@ -35,7 +36,7 @@ vec4 blur13(sampler2D image, vec2 uv, vec2 resolution, vec2 direction) {
     void main()
     {
         // TODO multipass blur instead of to 1,1 
-        f_color = blur13(tex, uv, vec2(300,300)*sqrt(2.), normalize(vec2(1,1)));
+        f_color = blur13(tex, uv, vec2(100,100), normalize(vec2(1,0)));
     }
 
 #endif

@@ -22,13 +22,10 @@
     </head>
     <body>
         <main class="contents">
-            <div class="title">Generating vector caves from cellular automata</div>
+            <div class="title">Doing stuff with WebGL</div>
 
-            <p>Let's make a little shooter game in a procedurally generated cave. 
-            We'll start off by using a 2D cellular automaton to generate a cave shape.
-            <a href="https://blog.jrheard.com/procedural-dungeon-generation-cellular-automata" >
-            This blog post does a great job of describing the technique.</a> 
-            </p>
+            <p>Here we've got a WebGL 2 context, and we're drawing triangles returned from the cave generator
+            we built in the previous post, seeded by Math.random() on page load.</p>
 
             <div class="canvas-holder">
                 <canvas id="first-canvas" width="300" height="300"></canvas>

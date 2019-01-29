@@ -44,8 +44,6 @@ export const initPost = () :void => {
     const ctx = firstCanvas.getContext('2d') as CanvasRenderingContext2D;
 
     const seedSlider = document.getElementById('seed-slider') as HTMLInputElement;
-    const popSlider = document.getElementById('pop-slider') as HTMLInputElement;
-    const genSlider = document.getElementById('gen-slider') as HTMLInputElement;
     const insuranceSlider = document.getElementById('insurance-slider') as HTMLInputElement;
     const curvinessSlider = document.getElementById('curviness-slider') as HTMLInputElement;
     const qualitySlider = document.getElementById('quality-slider') as HTMLInputElement;
@@ -226,7 +224,7 @@ export const initPost = () :void => {
     };
 
     multibind(
-        [popSlider, genSlider, seedSlider, insuranceSlider, curvinessSlider, qualitySlider],
+        [seedSlider, insuranceSlider, curvinessSlider, qualitySlider],
         ['oninput', 'onchange'],
         update
     );

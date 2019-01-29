@@ -7,6 +7,7 @@
     "watch": "webpack --watch"
   },
   "devDependencies": {
+    "@types/webgl2": "0.0.4",
     "awesome-typescript-loader": "^5.2.1",
     "express": "^4.16.4",
     "showdown": "^1.9.0",
