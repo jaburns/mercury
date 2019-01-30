@@ -8,7 +8,9 @@ export const initPost = () :void => {
     const canvas = document.getElementById('first-canvas') as HTMLCanvasElement;
     const gl = canvas.getContext('webgl2') as WebGL2RenderingContext;
 
-    const cave = generateCave({ seed: Math.random(), curveBend: 0.75, curveQuality: 10, edgePointDist: 2 });
+    const seed = 0.1247;
+
+    const cave = generateCave({ seed, curveBend: 0.75, curveQuality: 10, edgePointDist: 2 });
     const frameBufferTex = new FrameBufferTexture(gl, 1024, 1024);
 
     Promise.all([
@@ -24,6 +26,12 @@ export const initPost = () :void => {
         caveRenderer.draw();
 
         gaussBlur.run(frameBufferTex.texture, 30);
+
+        gl.bindFramebuffer(gl.FRAMEBUFFER, frameBufferTex.framebuffer);
+        gl.viewport(0, 0, 1024, 1024);
+        fullScreenBlit.drawWithNormals(gaussBlur.resultTexture);
+
+        gaussBlur.run(frameBufferTex.texture, 2);
 
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
         gl.viewport(0, 0, canvas.width, canvas.height);
