@@ -50,6 +50,8 @@ export class GaussianBlur {
 
         for (let i = 0; i < iterations; ++i) {
             gl.bindFramebuffer(gl.FRAMEBUFFER, this.frameTex0.framebuffer);
+            if (i === 0) gl.viewport(0, 0, this.width, this.height);
+
             gl.activeTexture(gl.TEXTURE0);
             gl.bindTexture(gl.TEXTURE_2D, i === 0 ? texture : this.frameTex1.texture);
             gl.uniform1i(loc_tex, 0);
