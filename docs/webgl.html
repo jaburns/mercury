@@ -28,7 +28,16 @@
             we built in the previous post, seeded by Math.random() on page load.</p>
 
             <div class="canvas-holder">
-                <canvas id="first-canvas" width="1024" height="1024"></canvas>
+                <canvas id="canvas0" width="350" height="350"></canvas>
+            </div>
+
+            <p>Let's apply a Gaussian blur over it, and then take the gradient of the results, normalize that gradient,
+            and we've then got surface normal information. It's a little janky though so we'll also run a little blur over it
+            to smooth it out.
+
+            <div class="canvas-holder">
+                <canvas id="canvas1" width="350" height="350"></canvas>
+                <canvas id="canvas2" width="350" height="350"></canvas>
             </div>
 
             <br /> <br /> <br /> <br /> <br /> <br />

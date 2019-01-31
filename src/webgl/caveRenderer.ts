@@ -20,15 +20,14 @@ const getFlatIndices = (cave: Cave): number[] => {
 export class CaveRenderer {
     private readonly gl: WebGL2RenderingContext;
     private readonly shader: WebGLProgram;
-
     private readonly vao: WebGLVertexArrayObject;
     private readonly vertexBuffer: WebGLBuffer;
     private readonly indexBuffer: WebGLBuffer;
 
     private readonly indexBufferLen: number;
 
-    static create(gl: WebGL2RenderingContext, cave: Cave): Promise<CaveRenderer> {
-        return loadShader(gl, 'shaders/flatWhite.glsl')
+    static create(gl: WebGL2RenderingContext, shaderPath: string, cave: Cave): Promise<CaveRenderer> {
+        return loadShader(gl, shaderPath)
             .then(shader => new CaveRenderer(gl, cave, shader));
     }
 
@@ -63,13 +62,15 @@ export class CaveRenderer {
         gl.drawElements(gl.TRIANGLES, this.indexBufferLen, gl.UNSIGNED_SHORT, 0);
     }
 
-    delete() {
+    release() {
         const gl = this.gl;
 
+        gl.useProgram(null);
         gl.bindVertexArray(null);
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
         gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
+        gl.deleteProgram(this.shader);
         gl.deleteBuffer(this.vertexBuffer);
         gl.deleteBuffer(this.indexBuffer);
         gl.deleteVertexArray(this.vao);
