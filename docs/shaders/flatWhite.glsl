@@ -1,6 +1,6 @@
 #ifdef VERTEX
 
-    layout(location = 0) in vec2 position;
+    attribute vec2 position;
 
     void main()
     {
@@ -10,11 +10,9 @@
 #endif
 #ifdef FRAGMENT
 
-    out vec4 f_color;
-
     void main()
     {
-        f_color = vec4(1, 1, 1, 1);
+        gl_FragColor = vec4(1, 1, 1, 1);
     }
 
 #endif

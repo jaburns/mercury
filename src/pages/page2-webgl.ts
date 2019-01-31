@@ -9,7 +9,7 @@ interface SurfaceInfoBuffers {
     readonly normal: WebGLTexture,
 }
 
-const buildSurfaceInfoBuffers = (gl: WebGL2RenderingContext, size: number, cave: Cave): Promise<SurfaceInfoBuffers> =>
+const buildSurfaceInfoBuffers = (gl: WebGLRenderingContext, size: number, cave: Cave): Promise<SurfaceInfoBuffers> =>
     Promise.all([
         CaveRenderer.create(gl, 'shaders/flatWhite.glsl', cave),
         BufferRenderer.create(gl, 'shaders/normals.glsl'),
@@ -48,7 +48,7 @@ const buildSurfaceInfoBuffers = (gl: WebGL2RenderingContext, size: number, cave:
     });
 
 
-const drawBasicCaveDemo = (cave: Cave, gl: WebGL2RenderingContext): void => {
+const drawBasicCaveDemo = (cave: Cave, gl: WebGLRenderingContext): void => {
     Promise.all([
         CaveRenderer.create(gl, 'shaders/flatWhite.glsl', cave),
     ])
@@ -63,7 +63,7 @@ const drawBasicCaveDemo = (cave: Cave, gl: WebGL2RenderingContext): void => {
     });
 };
 
-const drawInfoBufferDemo = (cave: Cave, kind: 'depth'|'normal', gl: WebGL2RenderingContext): void => {
+const drawInfoBufferDemo = (cave: Cave, kind: 'depth'|'normal', gl: WebGLRenderingContext): void => {
     Promise.all([
         BufferRenderer.create(gl, 'shaders/bufferCopy.glsl'),
         buildSurfaceInfoBuffers(gl, 1024, cave)
@@ -81,7 +81,7 @@ export const initPost = () :void => {
     const seed = 0.1248;
     const cave = generateCave({ seed, curveBend: 0.75, curveQuality: 10, edgePointDist: 2 });
 
-    const gl = [0,1,2].map(x => (document.getElementById('canvas'+x) as HTMLCanvasElement).getContext('webgl2') as WebGL2RenderingContext);
+    const gl = [0,1,2].map(x => (document.getElementById('canvas'+x) as HTMLCanvasElement).getContext('webgl') as WebGLRenderingContext);
 
     drawBasicCaveDemo(cave, gl[0]);
     drawInfoBufferDemo(cave, 'depth', gl[1]);

@@ -1,13 +1,9 @@
 const VERT_HEADER = 
-    `#version 300 es
-    #define VERTEX
-    #define v2f out
+    `#define VERTEX
     `;
 
 const FRAG_HEADER = 
-    `#version 300 es
-    #define FRAGMENT
-    #define v2f in
+    `#define FRAGMENT
     precision highp float;
     `;
 

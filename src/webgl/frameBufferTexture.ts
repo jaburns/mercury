@@ -2,9 +2,9 @@ export class FrameBufferTexture {
     readonly framebuffer: WebGLFramebuffer;
     readonly texture: WebGLTexture;
 
-    private readonly gl: WebGL2RenderingContext;
+    private readonly gl: WebGLRenderingContext;
 
-    constructor(gl: WebGL2RenderingContext, width: number, height: number) {
+    constructor(gl: WebGLRenderingContext, width: number, height: number) {
         this.gl = gl;
 
         this.framebuffer = gl.createFramebuffer() as WebGLFramebuffer;

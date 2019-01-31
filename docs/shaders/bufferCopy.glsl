@@ -1,10 +1,10 @@
 uniform sampler2D u_tex;
 
-v2f vec2 v_uv;
+varying vec2 v_uv;
 
 #ifdef VERTEX
 
-    layout(location = 0) in vec2 position;
+    attribute vec2 position;
 
     void main()
     {
@@ -15,11 +15,9 @@ v2f vec2 v_uv;
 #endif
 #ifdef FRAGMENT
 
-    out vec4 f_color;
-
     void main()
     {
-        f_color = texture(u_tex, v_uv);
+        gl_FragColor = texture2D(u_tex, v_uv);
     }
 
 #endif

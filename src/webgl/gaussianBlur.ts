@@ -2,7 +2,7 @@ import { FrameBufferTexture } from "./frameBufferTexture";
 import { BufferRenderer } from "./bufferRenderer";
 
 export class GaussianBlur {
-    private readonly gl: WebGL2RenderingContext;
+    private readonly gl: WebGLRenderingContext;
     private readonly width: number;
     private readonly height: number;
 
@@ -10,12 +10,12 @@ export class GaussianBlur {
     private readonly frameTex0: FrameBufferTexture;
     private readonly frameTex1: FrameBufferTexture;
 
-    static create(gl: WebGL2RenderingContext, width: number, height: number): Promise<GaussianBlur> {
+    static create(gl: WebGLRenderingContext, width: number, height: number): Promise<GaussianBlur> {
         return BufferRenderer.create(gl, 'shaders/gaussianBlur.glsl')
             .then(bufferRenderer => new GaussianBlur(gl, width, height, bufferRenderer));
     }
 
-    private constructor(gl: WebGL2RenderingContext, width: number, height: number, bufferRenderer: BufferRenderer) {
+    private constructor(gl: WebGLRenderingContext, width: number, height: number, bufferRenderer: BufferRenderer) {
         this.gl = gl;
         this.width = width;
         this.height = height;

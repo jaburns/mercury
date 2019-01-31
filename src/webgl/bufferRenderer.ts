@@ -1,34 +1,27 @@
 import { loadShader } from "./shaderLoader";
 
 export class BufferRenderer {
-    private readonly gl: WebGL2RenderingContext;
-    private readonly vao: WebGLVertexArrayObject;
+    private readonly gl: WebGLRenderingContext;
     private readonly vertexBuffer: WebGLBuffer;
     private readonly shader: WebGLProgram;
 
-    static create(gl: WebGL2RenderingContext, shaderPath: string, ): Promise<BufferRenderer> {
+    static create(gl: WebGLRenderingContext, shaderPath: string, ): Promise<BufferRenderer> {
         return loadShader(gl, shaderPath)
             .then(shader => new BufferRenderer(gl, shader));
     }
 
-    private constructor(gl: WebGL2RenderingContext, shader: WebGLProgram) {
+    private constructor(gl: WebGLRenderingContext, shader: WebGLProgram) {
         this.gl = gl;
         this.shader = shader;
-
-        this.vao = gl.createVertexArray() as WebGLVertexArrayObject;
-        gl.bindVertexArray(this.vao);
 
         this.vertexBuffer = gl.createBuffer() as WebGLBuffer;
         gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([ -1,1,-1,-1,1,-1,1,-1,1,1,-1,1 ]), gl.STATIC_DRAW);
-        gl.enableVertexAttribArray(0);
-        gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
     }
 
-    draw(texture: WebGLTexture, onPreDraw?: (gl: WebGL2RenderingContext, shader: WebGLProgram) => void) {
+    draw(texture: WebGLTexture, onPreDraw?: (gl: WebGLRenderingContext, shader: WebGLProgram) => void) {
         const gl = this.gl;
 
-        gl.bindVertexArray(this.vao);
         gl.useProgram(this.shader);
 
         gl.activeTexture(gl.TEXTURE0);
@@ -38,6 +31,10 @@ export class BufferRenderer {
 
         if (onPreDraw) onPreDraw(gl, this.shader);
 
+        gl.enableVertexAttribArray(0);
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
+        gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+
         gl.drawArrays(gl.TRIANGLES, 0, 6);
     }
 
@@ -45,11 +42,9 @@ export class BufferRenderer {
         const gl = this.gl;
 
         gl.useProgram(null);
-        gl.bindVertexArray(null);
         gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
         gl.deleteProgram(this.shader);
         gl.deleteBuffer(this.vertexBuffer);
-        gl.deleteVertexArray(this.vao);
     }
 }
