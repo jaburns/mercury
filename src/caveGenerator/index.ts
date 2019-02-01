@@ -2,8 +2,9 @@ import { Grid, WriteGrid, GridTool, safeOutOfBounds } from 'utils/grid';
 import { runCellularAutomaton } from './automaton';
 import { markEdges, findContours, EdgeMarkedMapTile, FindContoursResult } from './findContours';
 import { smoothCurve } from './smoothCurve';
-import { Vec2, findBounds, RectTool } from 'utils/math';
+import { findBounds, RectTool } from 'utils/math';
 import { triangulate } from './triangulate';
+import { vec2 } from 'gl-matrix';
 
 export interface CaveGeneratorConfig {
     seed: number,
@@ -13,7 +14,7 @@ export interface CaveGeneratorConfig {
 }
 
 export interface Cave {
-    edges: Vec2[][],
+    edges: vec2[][],
     triangles: number[][],
 }
 
@@ -105,8 +106,8 @@ export const generateCaveVerbose = (config: CaveGeneratorConfig): { cave: Cave, 
 
     const BOUNDS = 1.0;
 
-    const mostTopLeft = (pts: Vec2[]): number =>
-        pts.map((p, i) => ({ i, len: (p.x+BOUNDS)*(p.x+BOUNDS) + (p.y+BOUNDS)*(p.y+BOUNDS) }))
+    const mostTopLeft = (pts: vec2[]): number =>
+        pts.map((p, i) => ({ i, len: (p[0]+BOUNDS)*(p[0]+BOUNDS) + (p[1]+BOUNDS)*(p[1]+BOUNDS) }))
             .sort((a, b) => a.len - b.len)
             [0].i;
 

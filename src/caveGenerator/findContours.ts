@@ -1,5 +1,6 @@
 import { Grid, WriteGrid, GridTool, safeOutOfBounds } from 'utils/grid';
-import { Vec2, smallestDifferenceRadians } from 'utils/math';
+import { smallestDifferenceRadians } from 'utils/math';
+import { vec2 } from 'gl-matrix';
 
 export interface EdgeMarkedMapTile {
     kind: 'air' | 'dirt' | 'edge',
@@ -55,17 +56,17 @@ interface GridPoint {
 }
 
 export interface FindContoursResult {
-    contours: Vec2[][],
+    contours: vec2[][],
     walkMap: WriteGrid<WalkedStatus>,
 }
 
 export const findContours = (grid: Grid<EdgeMarkedMapTile>, spaceInsurance: 0 | 1 | 2): FindContoursResult => {
     const MAX_ITER = 100;
     const walkMap = GridTool.map(new WriteGrid<WalkedStatus>(grid.width, grid.height), _ => WalkedStatus.Unwalked);
-    const contours: Vec2[][] = [];
+    const contours: vec2[][] = [];
 
     let iter = 0;
-    let newContour: Vec2[] | null = null;
+    let newContour: vec2[] | null = null;
 
     do {
         newContour = findOneContour(walkMap, grid, spaceInsurance);
@@ -109,7 +110,7 @@ const bestCandidate = (prev: WalkCandidate, candidates: WalkCandidate[]): WalkCa
     return candidates[minI];
 };
 
-const findOneContour = (walkMap: WriteGrid<WalkedStatus>, grid: Grid<EdgeMarkedMapTile>, spaceInsurance: 0 | 1 | 2): Vec2[] | null => {
+const findOneContour = (walkMap: WriteGrid<WalkedStatus>, grid: Grid<EdgeMarkedMapTile>, spaceInsurance: 0 | 1 | 2): vec2[] | null => {
     const MAX_ITER = 5000;
 
     const freshStart = findFreshContour(walkMap, grid);
@@ -119,7 +120,7 @@ const findOneContour = (walkMap: WriteGrid<WalkedStatus>, grid: Grid<EdgeMarkedM
 
     grid = safeOutOfBounds(grid, {kind: 'dirt', normal: 0} as EdgeMarkedMapTile);
 
-    const points: Vec2[] = [];
+    const points: vec2[] = [];
     let x = freshStart.x;
     let y = freshStart.y;
 
@@ -163,10 +164,10 @@ const findOneContour = (walkMap: WriteGrid<WalkedStatus>, grid: Grid<EdgeMarkedM
             }
 
             if (newStatus === WalkedStatus.WalkedImportant) {
-                points.push({
-                    x: 2*(x + 0.5)/grid.width - 1,
-                    y: 2*(y + 0.5)/grid.height - 1,
-                });
+                points.push(vec2.fromValues(
+                    2*(x + 0.5)/grid.width - 1,
+                    2*(y + 0.5)/grid.height - 1,
+                ));
             }
 
             walkMap.write(x, y, newStatus);

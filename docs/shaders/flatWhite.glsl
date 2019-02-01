@@ -1,3 +1,5 @@
+precision highp float;
+
 #ifdef VERTEX
 
     attribute vec2 position;

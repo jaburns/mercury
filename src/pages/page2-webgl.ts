@@ -4,6 +4,7 @@ import { FrameBufferTexture } from "webgl/frameBufferTexture";
 import { BufferRenderer } from 'webgl/bufferRenderer';
 import { GaussianBlur } from 'webgl/gaussianBlur';
 
+
 interface SurfaceInfoBuffers {
     readonly depth: WebGLTexture,
     readonly normal: WebGLTexture,

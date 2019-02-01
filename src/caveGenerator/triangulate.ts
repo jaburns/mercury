@@ -1,6 +1,6 @@
-import { Vec2 } from 'utils/math';
+import { vec2 } from 'gl-matrix';
 
-export const triangulate = (points: Vec2[]): number[] => {
+export const triangulate = (points: vec2[]): number[] => {
     const indices: number[] = [];
     const n = points.length;
     if (n < 3) return indices;
@@ -37,21 +37,21 @@ export const triangulate = (points: Vec2[]): number[] => {
     return indices;
 };
 
-const area = (points: Vec2[]): number => {
+const area = (points: vec2[]): number => {
     let A = 0;
     for (let p = points.length - 1, q = 0; q < points.length; p = q++) {
-        A += points[p].x * points[q].y - points[q].x * points[p].y;
+        A += points[p][0] * points[q][1] - points[q][0] * points[p][1];
     }
     return A / 2;
 };
 
-const inside_triangle = (A: Vec2, B: Vec2, C: Vec2, P: Vec2): boolean => {
-    const ax = C.x - B.x, ay = C.y - B.y;
-    const bx = A.x - C.x, by = A.y - C.y;
-    const cx = B.x - A.x, cy = B.y - A.y;
-    const apx = P.x - A.x, apy = P.y - A.y;
-    const bpx = P.x - B.x, bpy = P.y - B.y;
-    const cpx = P.x - C.x, cpy = P.y - C.y;
+const inside_triangle = (A: vec2, B: vec2, C: vec2, P: vec2): boolean => {
+    const ax = C[0] - B[0], ay = C[1] - B[1];
+    const bx = A[0] - C[0], by = A[1] - C[1];
+    const cx = B[0] - A[0], cy = B[1] - A[1];
+    const apx = P[0] - A[0], apy = P[1] - A[1];
+    const bpx = P[0] - B[0], bpy = P[1] - B[1];
+    const cpx = P[0] - C[0], cpy = P[1] - C[1];
 
     const aCROSSbp = ax * bpy - ay * bpx;
     const cCROSSap = cx * apy - cy * apx;
@@ -60,12 +60,12 @@ const inside_triangle = (A: Vec2, B: Vec2, C: Vec2, P: Vec2): boolean => {
     return aCROSSbp >= 0 && bCROSScp >= 0 && cCROSSap >= 0;
 };
 
-const snip = (points: Vec2[], u: number, v: number, w: number, n: number, V: number[]): boolean => {
+const snip = (points: vec2[], u: number, v: number, w: number, n: number, V: number[]): boolean => {
     const A = points[V[u]];
     const B = points[V[v]];
     const C = points[V[w]];
 
-    const pdiff = (B.x - A.x) * (C.y - A.y) - (B.y - A.y) * (C.x - A.x);
+    const pdiff = (B[0] - A[0]) * (C[1] - A[1]) - (B[1] - A[1]) * (C[0] - A[0]);
     if (pdiff < 1e-7) return false;
 
     for (let p = 0; p < n; p++) {

@@ -1,7 +1,7 @@
 import { generateCaveVerbose, CaveGeneratorConfig } from 'caveGenerator';
 import { GridTool } from 'utils/grid';
 import { WalkedStatus } from 'caveGenerator/findContours';
-import { Vec2 } from 'utils/math';
+import { vec2 } from 'gl-matrix';
 
 const randomColorHex = (): string => {
     const randPair = (): string => {
@@ -112,10 +112,10 @@ export const initPost = () :void => {
 
         const BIG_CANVAS_SIZE = 675;
 
-        const curveSpaceToCanvasSpace = (pt: Vec2): Vec2 => ({ 
-            x: (BIG_CANVAS_SIZE / 2) * (1 + pt.x),
-            y: (BIG_CANVAS_SIZE / 2) * (1 + pt.y)
-        });
+        const curveSpaceToCanvasSpace = (pt: vec2): vec2 => vec2.fromValues(
+            (BIG_CANVAS_SIZE / 2) * (1 + pt[0]),
+            (BIG_CANVAS_SIZE / 2) * (1 + pt[1])
+        );
 
         // =--------------------------------------------
 
@@ -124,11 +124,11 @@ export const initPost = () :void => {
 
             ctx6.beginPath();
             const first = curveSpaceToCanvasSpace(c[0]);
-            ctx6.moveTo(first.x, first.y);
+            ctx6.moveTo(first[0], first[1]);
 
             for (let i = 1; i < c.length; ++i) {
                 const next = curveSpaceToCanvasSpace(c[i]);
-                ctx6.lineTo(next.x, next.y);
+                ctx6.lineTo(next[0], next[1]);
             }
 
             ctx6.closePath();
@@ -146,11 +146,11 @@ export const initPost = () :void => {
 
             ctx7.beginPath();
             const first = curveSpaceToCanvasSpace(c[0]);
-            ctx7.moveTo(first.x, first.y);
+            ctx7.moveTo(first[0], first[1]);
 
             for (let i = 1; i < c.length; ++i) {
                 const next = curveSpaceToCanvasSpace(c[i]);
-                ctx7.lineTo(next.x, next.y);
+                ctx7.lineTo(next[0], next[1]);
             }
 
             ctx7.closePath();
@@ -168,11 +168,11 @@ export const initPost = () :void => {
                 ctx9.beginPath();
 
                 const first = curveSpaceToCanvasSpace(cave.edges[j][ts[i]]);
-                ctx9.moveTo(first.x, first.y);
+                ctx9.moveTo(first[0], first[1]);
 
                 [1, 2, 0].forEach(o => {
                     const a = curveSpaceToCanvasSpace(cave.edges[j][ts[i+o]]);
-                    ctx9.lineTo(a.x, a.y);
+                    ctx9.lineTo(a[0], a[1]);
                 })
 
                 ctx9.fill();

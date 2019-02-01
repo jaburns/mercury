@@ -1,15 +1,6 @@
-const VERT_HEADER = 
-    `#define VERTEX
-    `;
-
-const FRAG_HEADER = 
-    `#define FRAGMENT
-    precision highp float;
-    `;
-
 const buildProgram = (gl: WebGLRenderingContext, body: string): WebGLProgram | string => {
     const vertShader = gl.createShader(gl.VERTEX_SHADER) as WebGLShader;
-    gl.shaderSource(vertShader, VERT_HEADER + body + '\n');
+    gl.shaderSource(vertShader, '#define VERTEX\n' + body + '\n');
     gl.compileShader(vertShader);
 
     const vertLog = gl.getShaderInfoLog(vertShader);
@@ -18,7 +9,7 @@ const buildProgram = (gl: WebGLRenderingContext, body: string): WebGLProgram | s
     }
 
     const fragShader = gl.createShader(gl.FRAGMENT_SHADER) as WebGLShader;
-    gl.shaderSource(fragShader, FRAG_HEADER + body + '\n');
+    gl.shaderSource(fragShader, '#define FRAGMENT\n' + body + '\n');
     gl.compileShader(fragShader);
 
     const fragLog = gl.getShaderInfoLog(fragShader);

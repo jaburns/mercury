@@ -1,3 +1,5 @@
+precision highp float;
+
 uniform sampler2D u_tex;
 
 varying vec2 v_uv;

@@ -1,3 +1,5 @@
+precision highp float;
+
 uniform sampler2D u_tex;
 uniform vec2 u_resolution;
 

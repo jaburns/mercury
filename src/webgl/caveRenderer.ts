@@ -2,8 +2,10 @@ import { Cave } from 'caveGenerator';
 import flatten = require('lodash/flatten');
 import { loadShader } from './shaderLoader';
 
+
+
 const getFlatVerts = (cave: Cave): number[] =>
-    flatten(flatten(cave.edges).map(v => [v.x, v.y]));
+    flatten(flatten(cave.edges).map(v => [v[0], v[1]]));
 
 const getFlatIndices = (cave: Cave): number[] => {
     let baseCount = 0;
