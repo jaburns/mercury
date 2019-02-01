@@ -19,20 +19,23 @@ export const smoothCurve = (input: vec2[], resolution: number, curviness: number
         const lenA = vec2.length(vec2.sub(vec2.create(), prev, curr));
         const lenB = vec2.length(vec2.sub(vec2.create(), curr, next));
 
-        /*
-        const midA = V2.scaled(V2.plus(prev, curr), 0.5);
-        const midB = V2.scaled(V2.plus(curr, next), 0.5);
-        const midDiff = V2.scaled(V2.minus(midA, midB), curviness);
+        let midA = vec2.add(vec2.create(), prev, curr);
+        vec2.scale(midA, midA, 0.5);
 
-        const diffA = V2.scaled(midDiff,  lenA / (lenA + lenB));
-        const diffB = V2.scaled(midDiff, -lenB / (lenA + lenB));
+        let midB = vec2.add(vec2.create(), curr, next);
+        vec2.scale(midB, midB, 0.5);
+
+        let midDiff = vec2.sub(vec2.create(), midA, midB);
+        vec2.scale(midDiff, midDiff, curviness);
+
+        const diffA = vec2.scale(vec2.create(), midDiff,  lenA / (lenA + lenB));
+        const diffB = vec2.scale(vec2.create(), midDiff, -lenB / (lenA + lenB));
 
         pts.push({
             pt: curr,
-            controlA: V2.plus(curr, diffA),
-            controlB: V2.plus(curr, diffB),
+            controlA: vec2.add(vec2.create(), diffA, curr),
+            controlB: vec2.add(vec2.create(), diffB, curr),
         });
-        */
     }
 
     const inc = 1 / resolution;

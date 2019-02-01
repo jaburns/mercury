@@ -6,12 +6,12 @@ varying vec2 v_uv;
 
 #ifdef VERTEX
 
-    attribute vec2 position;
+    attribute vec2 i_position;
 
     void main()
     {
-        gl_Position = vec4(position, 0, 1);
-        v_uv = position.xy*0.5 + 0.5;
+        gl_Position = vec4(i_position, 0, 1);
+        v_uv = i_position.xy*0.5 + 0.5;
     }
 
 #endif

@@ -1,11 +1,10 @@
 import { Cave } from 'caveGenerator';
 import flatten = require('lodash/flatten');
 import { loadShader } from './shaderLoader';
-
-
+import { mat4 } from 'gl-matrix';
 
 const getFlatVerts = (cave: Cave): number[] =>
-    flatten(flatten(cave.edges).map(v => [v[0], v[1]]));
+    flatten(flatten(cave.edges).map(x => Array.from(x)));
 
 const getFlatIndices = (cave: Cave): number[] => {
     let baseCount = 0;
@@ -53,9 +52,41 @@ export class CaveRenderer {
 
         gl.useProgram(this.shader);
 
-        gl.enableVertexAttribArray(0);
         gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
-        gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+
+        const posLoc = gl.getAttribLocation(this.shader, "i_position");
+        gl.enableVertexAttribArray(posLoc);
+        gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
+
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
+        gl.drawElements(gl.TRIANGLES, this.indexBufferLen, gl.UNSIGNED_SHORT, 0);
+    }
+
+    // TODO this should be default draw function
+    drawNice(ta: WebGLTexture, tb: WebGLTexture, t: number) {
+        const gl = this.gl;
+
+        gl.useProgram(this.shader);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
+
+        const posLoc = gl.getAttribLocation(this.shader, "i_position");
+        gl.enableVertexAttribArray(posLoc);
+        gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
+
+        const mvp = mat4.identity(mat4.create());
+        mat4.perspective(mvp, Math.PI / 2, 1, .01, 100);
+        gl.uniformMatrix4fv(gl.getUniformLocation(this.shader, "u_mvp"), false, mvp);
+
+        gl.uniform1f(gl.getUniformLocation(this.shader, "u_time"), t);
+
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, ta);
+        gl.uniform1i(gl.getUniformLocation(this.shader, "u_depth"), 0);
+
+        gl.activeTexture(gl.TEXTURE1);
+        gl.bindTexture(gl.TEXTURE_2D, tb);
+        gl.uniform1i(gl.getUniformLocation(this.shader, "u_normal"), 1);
 
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
         gl.drawElements(gl.TRIANGLES, this.indexBufferLen, gl.UNSIGNED_SHORT, 0);

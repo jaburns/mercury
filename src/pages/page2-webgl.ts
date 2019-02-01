@@ -78,13 +78,38 @@ const drawInfoBufferDemo = (cave: Cave, kind: 'depth'|'normal', gl: WebGLRenderi
     });
 };
 
+const drawDetailedCaveDemo = (cave: Cave, gl: WebGLRenderingContext): void => {
+    Promise.all([
+        CaveRenderer.create(gl, 'shaders/cave.glsl', cave),
+        buildSurfaceInfoBuffers(gl, 1024, cave)
+    ])
+    .then(([caveRenderer, infoBuffers]) => {
+        const startTime = Date.now();
+
+        const render = (): void => {
+            gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+            gl.clearColor(0, 0, 0, 1);
+            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+            caveRenderer.drawNice(infoBuffers.depth, infoBuffers.normal, Date.now() - startTime);
+
+            requestAnimationFrame(render);
+        };
+
+        requestAnimationFrame(render);
+
+        //caveRenderer.release();
+    });
+};
+
 export const initPost = () :void => {
-    const seed = 0.1248;
+    const seed = Math.random(); //0.1248;
     const cave = generateCave({ seed, curveBend: 0.75, curveQuality: 10, edgePointDist: 2 });
 
-    const gl = [0,1,2].map(x => (document.getElementById('canvas'+x) as HTMLCanvasElement).getContext('webgl') as WebGLRenderingContext);
+    const gl = [0,1,2,3].map(x => (document.getElementById('canvas'+x) as HTMLCanvasElement).getContext('webgl') as WebGLRenderingContext);
 
     drawBasicCaveDemo(cave, gl[0]);
     drawInfoBufferDemo(cave, 'depth', gl[1]);
     drawInfoBufferDemo(cave, 'normal', gl[2]);
+    drawDetailedCaveDemo(cave, gl[3])
 };

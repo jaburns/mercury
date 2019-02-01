@@ -31,9 +31,11 @@ export class BufferRenderer {
 
         if (onPreDraw) onPreDraw(gl, this.shader);
 
-        gl.enableVertexAttribArray(0);
         gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
-        gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+
+        const posLoc = gl.getAttribLocation(this.shader, "i_position");
+        gl.enableVertexAttribArray(posLoc);
+        gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
 
         gl.drawArrays(gl.TRIANGLES, 0, 6);
     }

@@ -115,23 +115,25 @@ export const generateCaveVerbose = (config: CaveGeneratorConfig): { cave: Cave, 
     const topLeftPt = smoothContours[outerMostContourIndex][topLeftPtI];
     const topLeftPrevPt = smoothContours[outerMostContourIndex][topLeftPtI === 0 ? smoothContours[outerMostContourIndex].length - 1 : topLeftPtI - 1];
 
-    const bumpDownAmount = Math.abs(topLeftPt.y - topLeftPrevPt.y);
+    const bumpDownAmount = Math.abs(topLeftPt[1] - topLeftPrevPt[1]);
 
     smoothContours[outerMostContourIndex].splice(topLeftPtI, 0,
-        {x: -BOUNDS, y: -BOUNDS+bumpDownAmount},
-        {x: -BOUNDS, y:  BOUNDS},
-        {x:  BOUNDS, y:  BOUNDS},
-        {x:  BOUNDS, y: -BOUNDS},
-        {x: -BOUNDS, y: -BOUNDS},
-        {x: (topLeftPt.x + topLeftPrevPt.x) / 2, 
-         y: (topLeftPt.y + topLeftPrevPt.y) / 2}
+        vec2.fromValues( -BOUNDS,  -BOUNDS+bumpDownAmount),
+        vec2.fromValues( -BOUNDS,   BOUNDS),
+        vec2.fromValues(  BOUNDS,   BOUNDS),
+        vec2.fromValues(  BOUNDS,  -BOUNDS),
+        vec2.fromValues( -BOUNDS,  -BOUNDS),
+        vec2.fromValues( 
+            (topLeftPt[0] + topLeftPrevPt[0]) / 2, 
+            (topLeftPt[1] + topLeftPrevPt[1]) / 2
+        )
     );
 
     const triangles = smoothContours.map(triangulate);
 
-    smoothContours[outerMostContourIndex][topLeftPtI].y -= bumpDownAmount;
-    smoothContours[outerMostContourIndex][topLeftPtI+5].x = topLeftPrevPt.x;
-    smoothContours[outerMostContourIndex][topLeftPtI+5].y = topLeftPrevPt.y;
+    smoothContours[outerMostContourIndex][topLeftPtI][1] -= bumpDownAmount;
+    smoothContours[outerMostContourIndex][topLeftPtI+5][0] = topLeftPrevPt[0];
+    smoothContours[outerMostContourIndex][topLeftPtI+5][1] = topLeftPrevPt[1];
 
     return {
         cave: {

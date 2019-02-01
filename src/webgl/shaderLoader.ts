@@ -21,6 +21,9 @@ const buildProgram = (gl: WebGLRenderingContext, body: string): WebGLProgram | s
     gl.attachShader(prog, vertShader);
     gl.attachShader(prog, fragShader);
     gl.linkProgram(prog);
+
+    // TODO delete individual shaders before returning compiled program
+
     return prog;
 };
 
