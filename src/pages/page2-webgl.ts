@@ -79,6 +79,21 @@ const drawInfoBufferDemo = (cave: Cave, kind: 'depth'|'normal', gl: WebGLRenderi
 };
 
 const drawDetailedCaveDemo = (cave: Cave, gl: WebGLRenderingContext): void => {
+    const mousePos = {x: 0, y: 0};
+    let mouseDown = false;
+    let zoomT = 0;
+
+    gl.canvas.onmousemove = e => {
+        const rect = gl.canvas.getBoundingClientRect();
+        mousePos.x = (e.clientX - rect.left) / gl.canvas.width;
+        mousePos.y = 1 - (e.clientY - rect.top)  / gl.canvas.height;
+    };
+
+    gl.canvas.onmousedown = _ => mouseDown = true;
+    gl.canvas.onmouseleave = 
+        gl.canvas.onmouseout =
+        gl.canvas.onmouseup = _ => mouseDown = false; 
+
     Promise.all([
         CaveRenderer.create(gl, 'shaders/cave.glsl', cave),
         buildSurfaceInfoBuffers(gl, 1024, cave)
@@ -91,7 +106,11 @@ const drawDetailedCaveDemo = (cave: Cave, gl: WebGLRenderingContext): void => {
             gl.clearColor(0, 0, 0, 1);
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-            caveRenderer.drawNice(infoBuffers.depth, infoBuffers.normal, Date.now() - startTime);
+            const t = Date.now() - startTime;
+            if (mouseDown) zoomT += 0.02;
+            const zoom = 0.55 + 0.45 * Math.cos(zoomT);
+
+            caveRenderer.drawNice(infoBuffers.depth, infoBuffers.normal, t, zoom, mousePos.x, mousePos.y);
 
             requestAnimationFrame(render);
         };

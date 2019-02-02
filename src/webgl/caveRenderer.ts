@@ -63,7 +63,7 @@ export class CaveRenderer {
     }
 
     // TODO this should be default draw function
-    drawNice(ta: WebGLTexture, tb: WebGLTexture, t: number) {
+    drawNice(ta: WebGLTexture, tb: WebGLTexture, t: number, zoom: number, x: number, y: number) {
         const gl = this.gl;
 
         gl.useProgram(this.shader);
@@ -79,6 +79,8 @@ export class CaveRenderer {
         gl.uniformMatrix4fv(gl.getUniformLocation(this.shader, "u_mvp"), false, mvp);
 
         gl.uniform1f(gl.getUniformLocation(this.shader, "u_time"), t);
+        gl.uniform1f(gl.getUniformLocation(this.shader, "u_zoom"), zoom);
+        gl.uniform2f(gl.getUniformLocation(this.shader, "u_pointLightPos"), x, y);
 
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, ta);
