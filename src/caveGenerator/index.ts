@@ -84,8 +84,11 @@ const fixSingleTileBridges = (grid: WriteGrid<boolean>): void => {
 export const generateCave = (config: CaveGeneratorConfig): Cave => 
     generateCaveVerbose(config).cave;
 
+export const generatePartialAutomatonResult = (seed: number, generation: number): Grid<boolean> =>
+    runCellularAutomaton(75, 75, seed, 0.48, 5, 4, generation);
+
 export const generateCaveVerbose = (config: CaveGeneratorConfig): { cave: Cave, details: CaveBuildDetails } => {
-    const automatonResult = runCellularAutomaton(75, 75, config.seed, 0.48, 5, 4, 40);
+    const automatonResult = runCellularAutomaton(75, 75, config.seed, 0.48, 5, 4, 30);
 
     const coloredGrid = GridTool.map(automatonResult, (x, y, val) => val ? -1 : 0);
     const bigColor = colorGridRegions(coloredGrid);

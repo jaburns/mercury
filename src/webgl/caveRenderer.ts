@@ -4,7 +4,7 @@ import { loadShader } from './shaderLoader';
 import { mat4 } from 'gl-matrix';
 
 const getFlatVerts = (cave: Cave): number[] =>
-    flatten(flatten(cave.edges).map(x => Array.from(x)));
+    flatten(flatten(cave.edges).map(x => [x[0], -x[1]]));
 
 const getFlatIndices = (cave: Cave): number[] => {
     let baseCount = 0;
@@ -14,6 +14,8 @@ const getFlatIndices = (cave: Cave): number[] => {
         result = result.concat(tris.map(x => x + baseCount));
         baseCount += cave.edges[index].length;
     });
+
+    result.reverse();
 
     return result;
 };

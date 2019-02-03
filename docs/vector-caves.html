@@ -10,9 +10,14 @@
             canvas {
                 display: inline-block;
                 border: 10px solid #29211c;
-                background-color: white;
+                background-color: black;
             }
             input { 
+                margin: auto;
+                display: block;
+                width: 300px;
+            }
+            button {
                 margin: auto;
                 display: block;
                 width: 300px;
@@ -30,11 +35,14 @@
             This blog post does a great job of describing the technique.</a> 
             </p>
 
+            <p><button id="generate-new">Generate a new grid</button></p>
+
             <div class="canvas-holder">
+                <canvas id="zeroth-canvas" width="300" height="300"></canvas>
                 <canvas id="first-canvas" width="300" height="300"></canvas>
             </div>
 
-            <p><input id="seed-slider" type="range" min="0" max="100" step="1" value="51"></p>
+            <p><input id="gen-slider" type="range" min="0" max="30" step="1" value="0"></p>
 
             <p>This technique does a good job of generating dungeon-like shapes, but 
             it often leaves us with inaccessible rooms. Since we don't want the players
@@ -60,7 +68,6 @@
                 <canvas id="fourth-canvas" width="300" height="300"></canvas>
                 <canvas id="fifth-canvas" width="300" height="300"></canvas>
             </div>
-            <p><input id="insurance-slider" type="range" min="0" max="2" step="1" value="2"></p>
 
             <p>
             Then we use a made-up heuristic to find interesting points along
@@ -75,7 +82,7 @@
 
             <p>
             Then we'll use <a href="http://www.antigrain.com/research/bezier_interpolation/">some
-            kind of an algorithm or something</a> to make this better. Once we've got our nice smooth
+            kind of an algorithm</a> to make this better. Once we've got our nice smooth
             cave world, let's find the point that's closest to the top left and mark it. We'll make a
             seam from here to a large bounding box around the outside so that we can fill the outer
             ground area.
@@ -86,19 +93,29 @@
             </div>
 
             <p>
-            Here's another unlabeled slider bound to the parameter of a random function:
-            </p>
-
-            <p><input id="quality-slider" type="range" min="2" max="15" step="1" value="10"></p>
-            <p><input id="curviness-slider" type="range" min="0" max="100" step="1" value="35"></p>
-
-            <p>
             As a final step before we call this level generator completed, let's cut the geometry up in to triangles
             so that we can easily render it with WebGL instead of slow 2D canvas calls. And here's our filled in cave:
             </p>
 
             <div class="canvas-holder">
                 <canvas id="ninth-canvas" width="675" height="675"></canvas>
+            </div>
+
+            <p>Let's apply a Gaussian blur over it, and then take the gradient of the results, normalize that gradient,
+            and we've then got surface normal information. It's a little janky though so we'll also run a little blur over it
+            to smooth it out.
+
+            <div class="canvas-holder">
+                <canvas id="canvas0" width="350" height="350"></canvas>
+                <canvas id="canvas1" width="350" height="350"></canvas>
+            </div>
+            
+            <p>Now that we've got a map that roughly correlates to distance from surface and another that provides the
+            direction of the surface we can piece them together to do some basic lighting. Here we've got a purple
+            direcional light and a red point light that follows the mouse. Click to zoom.</p>
+
+            <div class="canvas-holder">
+                <canvas id="canvas2" width="675" height="675"></canvas>
             </div>
 
             <br /> <br /> <br /> <br /> <br /> <br />
