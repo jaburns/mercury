@@ -33,6 +33,9 @@ varying vec2 v_uv;
 
     void main()
     {
+        gl_FragColor = texture2D(u_normal, 10.*v_uv);
+        return;
+
         vec2 normal = 2.*texture2D(u_normal, v_uv).rg - 1.;
         float depth = clamp(1.- texture2D(u_depth, v_uv).r, 0., 1.);
         depth = 2. * pow(depth, 2.);

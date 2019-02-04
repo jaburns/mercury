@@ -8,6 +8,7 @@ import { CaveRenderer } from "webgl/caveRenderer";
 import { FrameBufferTexture } from "webgl/frameBufferTexture";
 import { BufferRenderer } from 'webgl/bufferRenderer';
 import { GaussianBlur } from 'webgl/gaussianBlur';
+import { loadTexture } from 'webgl/textureLoader';
 
 
 interface SurfaceInfoBuffers {
@@ -86,9 +87,10 @@ const drawDetailedCaveDemo = (cave: Cave, gl: WebGLRenderingContext): void => {
 
     Promise.all([
         CaveRenderer.create(gl, 'shaders/cave.glsl', cave),
+        loadTexture(gl, "norm.jpg", gl.REPEAT),
         buildSurfaceInfoBuffers(gl, 1024, cave)
     ])
-    .then(([caveRenderer, infoBuffers]) => {
+    .then(([caveRenderer, normTex, infoBuffers]) => {
         const startTime = Date.now();
 
         const render = (): void => {
@@ -100,7 +102,8 @@ const drawDetailedCaveDemo = (cave: Cave, gl: WebGLRenderingContext): void => {
             if (mouseDown) zoomT += 0.02;
             const zoom = 0.55 + 0.45 * Math.cos(zoomT);
 
-            caveRenderer.drawNice(infoBuffers.depth, infoBuffers.normal, t, zoom, mousePos.x, mousePos.y);
+            //infoBuffers.normal
+            caveRenderer.drawNice(infoBuffers.depth, normTex, t, zoom, mousePos.x, mousePos.y);
 
             requestAnimationFrame(render);
         };

@@ -12,7 +12,7 @@
                 border: 10px solid #29211c;
                 background-color: black;
             }
-            input { 
+            input {
                 margin: auto;
                 display: block;
                 width: 300px;
@@ -29,10 +29,10 @@
         <main class="contents">
             <div class="title">Generating vector caves from cellular automata</div>
 
-            <p>Let's make a little shooter game in a procedurally generated cave. 
+            <p>Let's make a little shooter game in a procedurally generated cave.
             We'll start off by using a 2D cellular automaton to generate a cave shape.
             <a href="https://blog.jrheard.com/procedural-dungeon-generation-cellular-automata" >
-            This blog post does a great job of describing the technique.</a> 
+            This blog post does a great job of describing the technique.</a>
             </p>
 
             <p><button id="generate-new">Generate a new grid</button></p>
@@ -44,7 +44,7 @@
 
             <p><input id="gen-slider" type="range" min="0" max="30" step="1" value="0"></p>
 
-            <p>This technique does a good job of generating dungeon-like shapes, but 
+            <p>This technique does a good job of generating dungeon-like shapes, but
             it often leaves us with inaccessible rooms. Since we don't want the players
             to be able spawn in tiny isolated chambers, let's color all the contiguous
             chambers and fill in all but the largest one with dirt.
@@ -58,7 +58,7 @@
             <p>
             Now that we can safely throw the player in to any white region, and they will
             be able to navigate to anywhere else on the map, the next step is to turn this
-            blocky world in to something smooth. First let's mark off every dirt tile that 
+            blocky world in to something smooth. First let's mark off every dirt tile that
             has air in its von Neumann neighborhood. While we're at it, we can assign each
             of these surface tiles a 2D normal direction by looking at <i>which</i> tiles
             exactly are the ones with air.
@@ -72,7 +72,7 @@
             <p>
             Then we use a made-up heuristic to find interesting points along
             the boundary to iterpolate between. It's something like: walk along the boundary
-            and if the normal of the point changes, it's important. Now let's blow this up and 
+            and if the normal of the point changes, it's important. Now let's blow this up and
             draw some lines between the "important" points we found.
             </p>
 
@@ -109,7 +109,7 @@
                 <canvas id="canvas0" width="350" height="350"></canvas>
                 <canvas id="canvas1" width="350" height="350"></canvas>
             </div>
-            
+
             <p>Now that we've got a map that roughly correlates to distance from surface and another that provides the
             direction of the surface we can piece them together to do some basic lighting. Here we've got a purple
             direcional light and a red point light that follows the mouse. Click to zoom.</p>
