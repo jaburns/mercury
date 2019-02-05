@@ -87,7 +87,7 @@ const drawDetailedCaveDemo = (cave: Cave, gl: WebGLRenderingContext): void => {
 
     Promise.all([
         CaveRenderer.create(gl, 'shaders/cave.glsl', cave),
-        loadTexture(gl, "norm.jpg", gl.REPEAT),
+        loadTexture(gl, "NormalMap.png", gl.REPEAT),
         buildSurfaceInfoBuffers(gl, 1024, cave)
     ])
     .then(([caveRenderer, normTex, infoBuffers]) => {
@@ -102,8 +102,7 @@ const drawDetailedCaveDemo = (cave: Cave, gl: WebGLRenderingContext): void => {
             if (mouseDown) zoomT += 0.02;
             const zoom = 0.55 + 0.45 * Math.cos(zoomT);
 
-            //infoBuffers.normal
-            caveRenderer.drawNice(infoBuffers.depth, normTex, t, zoom, mousePos.x, mousePos.y);
+            caveRenderer.drawNice(infoBuffers.depth, infoBuffers.normal, normTex, t, zoom, mousePos.x, mousePos.y);
 
             requestAnimationFrame(render);
         };
