@@ -10,28 +10,6 @@ uniform vec2 u_pointLightPos;
 
 varying vec2 v_uv;
 
-
-float rand(vec2 c){
-	return fract(sin(dot(c.xy ,vec2(12.9898,78.233))) * 43758.5453);
-}
-
-float noise(vec2 p){
-	float unit = 1.;
-	vec2 ij = floor(p/unit);
-	vec2 xy = mod(p,unit)/unit;
-	//xy = 3.*xy*xy-2.*xy*xy*xy;
-	xy = .5*(1.-cos(3.14159*xy));
-	float a = rand((ij+vec2(0.,0.)));
-	float b = rand((ij+vec2(1.,0.)));
-	float c = rand((ij+vec2(0.,1.)));
-	float d = rand((ij+vec2(1.,1.)));
-	float x1 = mix(a, b, xy.x);
-	float x2 = mix(c, d, xy.x);
-	return mix(x1, x2, xy.y);
-}
-
-
-
 #ifdef VERTEX
 
     attribute vec2 i_position;
@@ -72,9 +50,14 @@ float noise(vec2 p){
         return LightAmount;
     }
 
+    float dirLightAmount(vec2 dir, vec2 normal)
+    {
+        return clamp(dot(normalize(dir), normal), 0., 1.);
+    }
+
     void main()
     {
-    float sint = 1.;//0.5+0.5*sin(u_time/500.);
+        float sint = 1.;//0.5+0.5*sin(u_time/500.);
 
         vec2 surfDir = 2.*texture2D(u_normal, v_uv).rg - 1.;
         float surfDepth = clamp(1.- texture2D(u_depth, v_uv).r, 0., 1.);
@@ -90,8 +73,15 @@ float noise(vec2 p){
 
         normalRocks = axisAngle(normalize(vec3(surfDir.y, -surfDir.x, 0)), sint*3.14159*surfDepth) * normalRocks;
 
-        vec3 baseColor = vec3(0,0,0);// .1 * vec3(1, .8, 1);
-        baseColor += vec3(1,.2,.1) * ptLightAmount(v_uv, normalRocks.xy);
+        vec3 baseColor = vec3(0,0,0);
+
+        // Point light
+        baseColor += vec3(1,1,1) * ptLightAmount(v_uv, normalRocks.xy);
+
+        // Dir lights
+        baseColor += vec3(1,.2,.1) * dirLightAmount(vec2(1,-.5), normalRocks.xy);
+        baseColor += vec3(.2,1,.1) * dirLightAmount(vec2(0,1), normalRocks.xy);
+        baseColor += vec3(.5,.5,1) * dirLightAmount(vec2(-1,-.5), normalRocks.xy);
 
         gl_FragColor = mix(vec4(baseColor, 1), vec4(0,0,0,1), 1.-sqrt(surfDepth));
     }

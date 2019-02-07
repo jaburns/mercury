@@ -87,7 +87,7 @@ const drawDetailedCaveDemo = (cave: Cave, gl: WebGLRenderingContext): void => {
 
     Promise.all([
         CaveRenderer.create(gl, 'shaders/cave.glsl', cave),
-        loadTexture(gl, "NormalMap.png", gl.REPEAT),
+        loadTexture(gl, "caveWalls.png", gl.REPEAT),
         buildSurfaceInfoBuffers(gl, 1024, cave)
     ])
     .then(([caveRenderer, normTex, infoBuffers]) => {
