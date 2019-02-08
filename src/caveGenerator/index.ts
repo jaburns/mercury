@@ -6,13 +6,6 @@ import { findBounds, RectTool } from 'utils/math';
 import { triangulate } from './triangulate';
 import { vec2 } from 'gl-matrix';
 
-export interface CaveGeneratorConfig {
-    seed: number,
-    edgePointDist: 0 | 1 | 2,
-    curveQuality: number,
-    curveBend: number,
-}
-
 export interface Cave {
     edges: vec2[][],
     triangles: number[][],
@@ -81,14 +74,14 @@ const fixSingleTileBridges = (grid: WriteGrid<boolean>): void => {
     });
 };
 
-export const generateCave = (config: CaveGeneratorConfig): Cave => 
-    generateCaveVerbose(config).cave;
+export const generateCave = (seed: number): Cave => 
+    generateCaveVerbose(seed).cave;
 
 export const generatePartialAutomatonResult = (seed: number, generation: number): Grid<boolean> =>
     runCellularAutomaton(75, 75, seed, 0.48, 5, 4, generation);
 
-export const generateCaveVerbose = (config: CaveGeneratorConfig): { cave: Cave, details: CaveBuildDetails } => {
-    const automatonResult = runCellularAutomaton(75, 75, config.seed, 0.48, 5, 4, 30);
+export const generateCaveVerbose = (seed: number): { cave: Cave, details: CaveBuildDetails } => {
+    const automatonResult = runCellularAutomaton(75, 75, seed, 0.48, 5, 4, 30);
 
     const coloredGrid = GridTool.map(automatonResult, (x, y, val) => val ? -1 : 0);
     const bigColor = colorGridRegions(coloredGrid);
@@ -98,14 +91,14 @@ export const generateCaveVerbose = (config: CaveGeneratorConfig): { cave: Cave, 
 
     const edgeMarkedGrid = markEdges(filledGrid);
 
-    const findContoursResult = findContours(edgeMarkedGrid, config.edgePointDist);
+    const findContoursResult = findContours(edgeMarkedGrid, 2);
 
     const outerMostContourIndex = findContoursResult.contours
         .map((c, i) => ({ i, area: RectTool.area(findBounds(c)) }))
         .sort((a, b) => b.area - a.area)
         [0].i;
 
-    const smoothContours = findContoursResult.contours.map(x => smoothCurve(x, config.curveQuality, config.curveBend));
+    const smoothContours = findContoursResult.contours.map(x => smoothCurve(x, 10, 0.7));
 
     const BOUNDS = 1.0;
 

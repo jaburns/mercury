@@ -1,4 +1,4 @@
-import { generateCaveVerbose, CaveGeneratorConfig, generatePartialAutomatonResult } from 'caveGenerator';
+import { generateCaveVerbose, generatePartialAutomatonResult } from 'caveGenerator';
 import { GridTool } from 'utils/grid';
 import { WalkedStatus } from 'caveGenerator/findContours';
 import { vec2 } from 'gl-matrix';
@@ -181,14 +181,7 @@ export const initPost = () :void => {
 
         updatePartialAutomatonResult();
 
-        const config: CaveGeneratorConfig = {
-            seed,
-            edgePointDist: 2,
-            curveBend: 2 * 35 / 100,
-            curveQuality: 10,
-        };
-
-        const { cave, details } = generateCaveVerbose(config);
+        const { cave, details } = generateCaveVerbose(seed);
         caveCache = cave;
 
         GridTool.forEach(details.automatonResult, (x, y, val) => {
