@@ -35,7 +35,7 @@ export const getShaders = (gl: WebGLRenderingContext): ShaderCollection => {
 
 const compileShader = (gl: WebGLRenderingContext, body: string): WebGLProgram => {
     const vertShader = gl.createShader(gl.VERTEX_SHADER) as WebGLShader;
-    gl.shaderSource(vertShader, '#define VERTX\n' + body + '\n');
+    gl.shaderSource(vertShader, '#define VERTEX\n' + body + '\n');
     gl.compileShader(vertShader);
 
     const vertLog = gl.getShaderInfoLog(vertShader);
