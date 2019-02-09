@@ -15,12 +15,12 @@ interface ShaderCollection {
 }
 
 const buildCollection = (gl: WebGLRenderingContext): ShaderCollection => ({
-    //foreach_shader $: compileShader(gl, $),
-    bufferCopy: compileShader(gl, bufferCopy),//_generated
-    cave: compileShader(gl, cave),//_generated
-    flatWhite: compileShader(gl, flatWhite),//_generated
-    gaussianBlur: compileShader(gl, gaussianBlur),//_generated
-    normals: compileShader(gl, normals),//_generated
+    //foreach_shader $: compileShader(gl, '$', $),
+    bufferCopy: compileShader(gl, 'bufferCopy', bufferCopy),//_generated
+    cave: compileShader(gl, 'cave', cave),//_generated
+    flatWhite: compileShader(gl, 'flatWhite', flatWhite),//_generated
+    gaussianBlur: compileShader(gl, 'gaussianBlur', gaussianBlur),//_generated
+    normals: compileShader(gl, 'normals', normals),//_generated
 });
 
 const compiledShaders: { [canvasId: string]: ShaderCollection } = {};
@@ -33,14 +33,20 @@ export const getShaders = (gl: WebGLRenderingContext): ShaderCollection => {
     return compiledShaders[gl.canvas.id];
 };
 
-const compileShader = (gl: WebGLRenderingContext, body: string): WebGLProgram => {
+const errorHTML = (kind: 'vertex' | 'fragment', name: string, log: string): string => `
+    <h1>Error in ${kind} shader in "${name}.glsl"</h1>
+    <code>${log.replace(/\n/g, '<br/>')}</code>
+`;
+
+const compileShader = (gl: WebGLRenderingContext, name: string, body: string): WebGLProgram => {
     const vertShader = gl.createShader(gl.VERTEX_SHADER) as WebGLShader;
     gl.shaderSource(vertShader, '#define VERTEX\n' + body + '\n');
     gl.compileShader(vertShader);
 
     const vertLog = gl.getShaderInfoLog(vertShader);
     if (vertLog === null || vertLog.length > 0) {
-        throw new Error(vertLog as string);
+        document.body.innerHTML = errorHTML('vertex', name, vertLog as string);
+        throw new Error('Error compiling shader: ' + name);
     }
 
     const fragShader = gl.createShader(gl.FRAGMENT_SHADER) as WebGLShader;
@@ -49,7 +55,8 @@ const compileShader = (gl: WebGLRenderingContext, body: string): WebGLProgram =>
 
     const fragLog = gl.getShaderInfoLog(fragShader);
     if (fragLog === null || fragLog.length > 0) {
-        throw new Error( fragLog as string);
+        document.body.innerHTML = errorHTML('fragment', name, fragLog as string);
+        throw new Error('Error compiling shader: ' + name);
     }
 
     const prog = gl.createProgram() as WebGLProgram;
