@@ -15,7 +15,7 @@ const processLine = line =>
 
 module.exports = () => {
     const oldFile = fs.readFileSync(filePath, 'utf8');
-    const newFile = _.flatten(oldFile.split('\n').map(processLine)).join('\n');
+    const newFile = _.flatten(oldFile.split('\n').map(processLine)).join('\n').replace(/\r/g, '');
 
     if (newFile !== oldFile) {
         fs.writeFileSync(filePath, newFile);
