@@ -14,11 +14,11 @@ const processLine = line =>
     [line].concat(shaders.map(s => line.replace('//foreach_shader ', '').replace(/\$/g, s) + '//_generated'));
 
 module.exports = () => {
-    fs.writeFileSync(filePath,
-        _.flatten(fs.readFileSync(filePath, 'utf8')
-            .split('\n')
-            .map(processLine)
-        ).join('\n'));
+    const oldFile = fs.readFileSync(filePath, 'utf8');
+    const newFile = _.flatten(oldFile.split('\n').map(processLine)).join('\n');
 
-    console.log('Updated shaders/index.ts with glsl files from filesystem.');
+    if (newFile !== oldFile) {
+        fs.writeFileSync(filePath, newFile);
+        console.log('Updated shaders/index.ts with glsl files from filesystem.');
+    }
 };

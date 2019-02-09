@@ -1,5 +1,4 @@
 const WebpackPreBuildPlugin = require('pre-build-webpack');
-const shadersGenIndex = require('./src/shaders/index.gen.js');
 
 module.exports = {
     mode: 'production',
@@ -22,8 +21,7 @@ module.exports = {
     },
     plugins: [
         new WebpackPreBuildPlugin(stats => {
-            // TODO fix this causing a watch infinite loop from constantly updating the file. (dont write if not different)
-            shadersGenIndex();
+            require('./src/shaders/index.gen.js')();
         })
     ],
     optimization: {
