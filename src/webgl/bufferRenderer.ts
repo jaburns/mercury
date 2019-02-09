@@ -1,16 +1,9 @@
-import { loadShader } from "./shaderLoader";
-
 export class BufferRenderer {
     private readonly gl: WebGLRenderingContext;
     private readonly vertexBuffer: WebGLBuffer;
     private readonly shader: WebGLProgram;
 
-    static create(gl: WebGLRenderingContext, shaderPath: string, ): Promise<BufferRenderer> {
-        return loadShader(gl, shaderPath)
-            .then(shader => new BufferRenderer(gl, shader));
-    }
-
-    private constructor(gl: WebGLRenderingContext, shader: WebGLProgram) {
+    constructor(gl: WebGLRenderingContext, shader: WebGLProgram) {
         this.gl = gl;
         this.shader = shader;
 

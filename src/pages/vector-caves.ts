@@ -9,7 +9,7 @@ import { FrameBufferTexture } from "webgl/frameBufferTexture";
 import { BufferRenderer } from 'webgl/bufferRenderer';
 import { GaussianBlur } from 'webgl/gaussianBlur';
 import { loadTexture } from 'webgl/textureLoader';
-
+import { getShaders } from 'shaders';
 
 interface SurfaceInfoBuffers {
     readonly depth: WebGLTexture,
@@ -18,12 +18,13 @@ interface SurfaceInfoBuffers {
 
 const buildSurfaceInfoBuffers = (gl: WebGLRenderingContext, size: number, cave: Cave): Promise<SurfaceInfoBuffers> =>
     Promise.all([
-        CaveRenderer.create(gl, 'shaders/flatWhite.glsl', cave),
-        BufferRenderer.create(gl, 'shaders/normals.glsl'),
-        GaussianBlur.create(gl, size, size),
-        GaussianBlur.create(gl, size, size)
     ])
-    .then(([caveRenderer, normalsBlit, gaussBlur0, gaussBlur1]) => {
+    .then(([]) => {
+        const caveRenderer = new CaveRenderer(gl, cave, getShaders(gl).flatWhite);
+        const normalsBlit = new BufferRenderer(gl, getShaders(gl).normals);
+        const gaussBlur0 = new GaussianBlur(gl, size, size);
+        const gaussBlur1 = new GaussianBlur(gl, size, size);
+
         const frameBufferTex = new FrameBufferTexture(gl, size, size);
 
         gl.bindFramebuffer(gl.FRAMEBUFFER, frameBufferTex.framebuffer);
@@ -57,10 +58,11 @@ const buildSurfaceInfoBuffers = (gl: WebGLRenderingContext, size: number, cave: 
 
 const drawInfoBufferDemo = (cave: Cave, kind: 'depth'|'normal', gl: WebGLRenderingContext): void => {
     Promise.all([
-        BufferRenderer.create(gl, 'shaders/bufferCopy.glsl'),
         buildSurfaceInfoBuffers(gl, 1024, cave)
     ])
-    .then(([copyBlit, infoBuffers]) => {
+    .then(([infoBuffers]) => {
+        const copyBlit = new BufferRenderer(gl, getShaders(gl).bufferCopy);
+
         copyBlit.draw(kind === 'depth' ? infoBuffers.depth : infoBuffers.normal);
 
         copyBlit.release();
@@ -86,11 +88,12 @@ const drawDetailedCaveDemo = (cave: Cave, gl: WebGLRenderingContext): void => {
         gl.canvas.onmouseup = _ => mouseDown = false; 
 
     Promise.all([
-        CaveRenderer.create(gl, 'shaders/cave.glsl', cave),
         loadTexture(gl, "caveWalls.png", gl.REPEAT),
         buildSurfaceInfoBuffers(gl, 1024, cave)
     ])
-    .then(([caveRenderer, normTex, infoBuffers]) => {
+    .then(([normTex, infoBuffers]) => {
+        const caveRenderer = new CaveRenderer(gl, cave, getShaders(gl).cave);
+
         const startTime = Date.now();
 
         const render = (): void => {

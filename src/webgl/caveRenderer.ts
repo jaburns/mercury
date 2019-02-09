@@ -1,6 +1,5 @@
 import { Cave } from 'caveGenerator';
 import flatten = require('lodash/flatten');
-import { loadShader } from './shaderLoader';
 import { mat4 } from 'gl-matrix';
 
 const getFlatVerts = (cave: Cave): number[] =>
@@ -25,15 +24,9 @@ export class CaveRenderer {
     private readonly shader: WebGLProgram;
     private readonly vertexBuffer: WebGLBuffer;
     private readonly indexBuffer: WebGLBuffer;
-
     private readonly indexBufferLen: number;
 
-    static create(gl: WebGLRenderingContext, shaderPath: string, cave: Cave): Promise<CaveRenderer> {
-        return loadShader(gl, shaderPath)
-            .then(shader => new CaveRenderer(gl, cave, shader));
-    }
-
-    private constructor(gl: WebGLRenderingContext, cave: Cave, shader: WebGLProgram) {
+    constructor(gl: WebGLRenderingContext, cave: Cave, shader: WebGLProgram) {
         this.gl = gl;
         this.shader = shader;
 
