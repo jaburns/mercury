@@ -25,7 +25,6 @@ export class BufferRenderer {
         if (onPreDraw) onPreDraw(gl, this.shader);
 
         gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
-
         const posLoc = gl.getAttribLocation(this.shader, "i_position");
         gl.enableVertexAttribArray(posLoc);
         gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
@@ -39,7 +38,6 @@ export class BufferRenderer {
         gl.useProgram(null);
         gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
-        gl.deleteProgram(this.shader);
         gl.deleteBuffer(this.vertexBuffer);
     }
 }

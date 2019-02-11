@@ -6,7 +6,7 @@ interface Pt {
     controlB: vec2,
 }
 
-export const smoothCurve = (input: vec2[], resolution: number, curviness: number): vec2[] => {
+export const smoothCurve = (input: ReadonlyArray<vec2>, resolution: number, curviness: number): vec2[] => {
     const pts: Pt[] = [];
 
     if (resolution < 1) resolution = 1;

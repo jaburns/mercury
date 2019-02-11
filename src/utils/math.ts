@@ -24,7 +24,7 @@ export const smallestDifferenceRadians = (a: number, b: number): number => {
     return a - b;
 };
 
-export const findBounds = (pts: vec2[]): Rect => {
+export const findBounds = (pts: ReadonlyArray<vec2>): Rect => {
     const result: Rect = { xmin: Infinity, ymin: Infinity, xmax: -Infinity, ymax: -Infinity };
 
     pts.forEach(p => {

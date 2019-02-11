@@ -2,73 +2,22 @@ import { generateCaveVerbose, generatePartialAutomatonResult } from 'caveGenerat
 import { GridTool } from 'utils/grid';
 import { WalkedStatus } from 'caveGenerator/findContours';
 import { vec2 } from 'gl-matrix';
-
 import { Cave } from 'caveGenerator';
 import { CaveRenderer } from "webgl/caveRenderer";
-import { FrameBufferTexture } from "webgl/frameBufferTexture";
 import { BufferRenderer } from 'webgl/bufferRenderer';
-import { GaussianBlur } from 'webgl/gaussianBlur';
 import { loadTexture } from 'webgl/textureLoader';
 import { getShaders } from 'shaders';
-
-interface SurfaceInfoBuffers {
-    readonly depth: WebGLTexture,
-    readonly normal: WebGLTexture,
-}
-
-const buildSurfaceInfoBuffers = (gl: WebGLRenderingContext, size: number, cave: Cave): Promise<SurfaceInfoBuffers> =>
-    Promise.all([
-    ])
-    .then(([]) => {
-        const caveRenderer = new CaveRenderer(gl, cave, getShaders(gl).flatWhite);
-        const normalsBlit = new BufferRenderer(gl, getShaders(gl).normals);
-        const gaussBlur0 = new GaussianBlur(gl, size, size);
-        const gaussBlur1 = new GaussianBlur(gl, size, size);
-
-        const frameBufferTex = new FrameBufferTexture(gl, size, size);
-
-        gl.bindFramebuffer(gl.FRAMEBUFFER, frameBufferTex.framebuffer);
-        gl.viewport(0, 0, size, size);
-        gl.clearColor(0, 0, 0, 1);
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-        caveRenderer.draw();
-
-        gaussBlur0.run(frameBufferTex.texture, 30);
-
-        gl.bindFramebuffer(gl.FRAMEBUFFER, frameBufferTex.framebuffer);
-        gl.viewport(0, 0, size, size);
-
-        normalsBlit.draw(gaussBlur0.resultTexture, (gl, shader) => {
-            gl.uniform2f(gl.getUniformLocation(shader, "u_resolution"), size, size);
-        });
-
-        gaussBlur1.run(frameBufferTex.texture, 2);
-
-        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-        gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-
-        caveRenderer.release();
-        normalsBlit.release();
-        const depth = gaussBlur0.releaseTexture();
-        const normal = gaussBlur1.releaseTexture();
-
-        return { depth, normal };
-    });
-
+import { buildSurfaceInfoBuffers } from 'webgl/caveSurfaceInfo';
 
 const drawInfoBufferDemo = (cave: Cave, kind: 'depth'|'normal', gl: WebGLRenderingContext): void => {
-    Promise.all([
-        buildSurfaceInfoBuffers(gl, 1024, cave)
-    ])
-    .then(([infoBuffers]) => {
-        const copyBlit = new BufferRenderer(gl, getShaders(gl).bufferCopy);
+    const infoBuffers = buildSurfaceInfoBuffers(gl, 1024, cave);
+    const copyBlit = new BufferRenderer(gl, getShaders(gl).bufferCopy);
 
-        copyBlit.draw(kind === 'depth' ? infoBuffers.depth : infoBuffers.normal);
+    copyBlit.draw(kind === 'depth' ? infoBuffers.depth : infoBuffers.normal);
 
-        copyBlit.release();
-        gl.deleteTexture(infoBuffers.depth);
-        gl.deleteTexture(infoBuffers.normal);
-    });
+    copyBlit.release();
+    gl.deleteTexture(infoBuffers.depth);
+    gl.deleteTexture(infoBuffers.normal);
 };
 
 const drawDetailedCaveDemo = (cave: Cave, gl: WebGLRenderingContext): void => {
@@ -87,12 +36,10 @@ const drawDetailedCaveDemo = (cave: Cave, gl: WebGLRenderingContext): void => {
         gl.canvas.onmouseout =
         gl.canvas.onmouseup = _ => mouseDown = false; 
 
-    Promise.all([
-        loadTexture(gl, "caveWalls.png", gl.REPEAT),
-        buildSurfaceInfoBuffers(gl, 1024, cave)
-    ])
-    .then(([normTex, infoBuffers]) => {
+    loadTexture(gl, "caveWalls.png", gl.REPEAT)
+    .then(normTex => {
         const caveRenderer = new CaveRenderer(gl, cave, getShaders(gl).cave);
+        const infoBuffers = buildSurfaceInfoBuffers(gl, 1024, cave);
 
         const startTime = Date.now();
 
@@ -111,7 +58,6 @@ const drawDetailedCaveDemo = (cave: Cave, gl: WebGLRenderingContext): void => {
         };
 
         requestAnimationFrame(render);
-
         //caveRenderer.release();
     });
 };
@@ -247,6 +193,7 @@ export const initPost = () :void => {
         ctx7.strokeStyle = '#0f0';
         ctx7.fillStyle = '#000';
         ctx7.fillRect(0, 0, BIG_CANVAS_SIZE, BIG_CANVAS_SIZE);
+
 
         cave.edges.forEach((c, i) => {
             ctx7.strokeStyle = i === details.outerMostContourIndex ? '#0f0' : '#393';

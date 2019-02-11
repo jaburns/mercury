@@ -100,7 +100,6 @@ export class CaveRenderer {
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
         gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
-        gl.deleteProgram(this.shader);
         gl.deleteBuffer(this.vertexBuffer);
         gl.deleteBuffer(this.indexBuffer);
     }

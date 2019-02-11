@@ -1,6 +1,6 @@
 import { vec2 } from 'gl-matrix';
 
-export const triangulate = (points: vec2[]): number[] => {
+export const triangulate = (points: ReadonlyArray<vec2>): number[] => {
     const indices: number[] = [];
     const n = points.length;
     if (n < 3) return indices;
@@ -37,7 +37,7 @@ export const triangulate = (points: vec2[]): number[] => {
     return indices;
 };
 
-const area = (points: vec2[]): number => {
+const area = (points: ReadonlyArray<vec2>): number => {
     let A = 0;
     for (let p = points.length - 1, q = 0; q < points.length; p = q++) {
         A += points[p][0] * points[q][1] - points[q][0] * points[p][1];
@@ -60,7 +60,7 @@ const inside_triangle = (A: vec2, B: vec2, C: vec2, P: vec2): boolean => {
     return aCROSSbp >= 0 && bCROSScp >= 0 && cCROSSap >= 0;
 };
 
-const snip = (points: vec2[], u: number, v: number, w: number, n: number, V: number[]): boolean => {
+const snip = (points: ReadonlyArray<vec2>, u: number, v: number, w: number, n: number, V: number[]): boolean => {
     const A = points[V[u]];
     const B = points[V[v]];
     const C = points[V[w]];
