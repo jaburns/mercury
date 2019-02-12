@@ -1,10 +1,10 @@
 precision highp float;
 
-uniform mat4 u_mvp;
 uniform sampler2D u_depth;
 uniform sampler2D u_normal;
 uniform sampler2D u_normalRocks;
 uniform float u_time;
+uniform float u_zoom;
 uniform vec2 u_pointLightPos;
 
 varying vec2 v_uv;
@@ -15,8 +15,9 @@ varying vec2 v_uv;
 
     void main()
     {
-        v_uv = i_position*0.5 + 0.5;
-        gl_Position = u_mvp * vec4(i_position, 0, 1);
+        vec2 pospos = i_position - (2.*u_pointLightPos-1.)*(1. - u_zoom);
+        gl_Position = vec4(pospos, -u_zoom, 1);
+        v_uv = i_position.xy*0.5 + 0.5;
     }
 
 #endif
@@ -48,6 +49,11 @@ varying vec2 v_uv;
         return LightAmount;
     }
 
+    float dirLightAmount(vec2 dir, vec2 normal)
+    {
+        return clamp(dot(normalize(dir), normal), 0., 1.);
+    }
+
     void main()
     {
         float sint = 1.;//0.5+0.5*sin(u_time/500.);
@@ -70,6 +76,11 @@ varying vec2 v_uv;
 
         // Point light
         baseColor += vec3(1,1,1) * ptLightAmount(v_uv, normalRocks.xy);
+
+        // Dir lights
+        baseColor += vec3(1,.2,.1) * dirLightAmount(vec2(1,-.5), normalRocks.xy);
+        baseColor += vec3(.2,1,.1) * dirLightAmount(vec2(0,1), normalRocks.xy);
+        baseColor += vec3(.5,.5,1) * dirLightAmount(vec2(-1,-.5), normalRocks.xy);
 
         gl_FragColor = mix(vec4(baseColor, 1), vec4(0,0,0,1), 1.-sqrt(surfDepth));
     }

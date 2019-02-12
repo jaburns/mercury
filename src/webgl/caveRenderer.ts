@@ -1,6 +1,14 @@
 import { Cave } from 'caveGenerator';
 import flatten = require('lodash/flatten');
-import { mat4 } from 'gl-matrix';
+import { getShaders } from 'shaders';
+import { BufferRenderer } from './bufferRenderer';
+import { GaussianBlur } from './gaussianBlur';
+import { FrameBufferTexture } from './frameBufferTexture';
+
+export interface SurfaceInfoBuffers {
+    readonly depth: WebGLTexture,
+    readonly normal: WebGLTexture,
+}
 
 const getFlatVerts = (cave: Cave): number[] =>
     flatten(flatten(cave.edges).map(x => [x[0], -x[1]]));
@@ -20,15 +28,18 @@ const getFlatIndices = (cave: Cave): number[] => {
 };
 
 export class CaveRenderer {
+    static readonly SURFACE_INFO_BUFFER_SIZE = 1024;
+
     private readonly gl: WebGLRenderingContext;
-    private readonly shader: WebGLProgram;
     private readonly vertexBuffer: WebGLBuffer;
     private readonly indexBuffer: WebGLBuffer;
     private readonly indexBufferLen: number;
+    private readonly normalsTexture: WebGLTexture | null;
+    private readonly _surfaceInfoBuffers: SurfaceInfoBuffers;
 
-    constructor(gl: WebGLRenderingContext, cave: Cave, shader: WebGLProgram) {
+    constructor(gl: WebGLRenderingContext, cave: Cave, normalsTexture: WebGLTexture | null) {
         this.gl = gl;
-        this.shader = shader;
+        this.normalsTexture = normalsTexture;
 
         this.vertexBuffer = gl.createBuffer() as WebGLBuffer;
         gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
@@ -40,16 +51,82 @@ export class CaveRenderer {
         this.indexBuffer = gl.createBuffer() as WebGLBuffer;
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indexBufferData), gl.STATIC_DRAW);
+
+        this._surfaceInfoBuffers = this.buildSurfaceInfoBuffers(CaveRenderer.SURFACE_INFO_BUFFER_SIZE);
     }
 
-    draw() {
+    private buildSurfaceInfoBuffers(size: number): SurfaceInfoBuffers {
         const gl = this.gl;
+        const normalsBlit = new BufferRenderer(gl, getShaders(gl).normals);
+        const gaussBlur0 = new GaussianBlur(gl, size, size);
+        const gaussBlur1 = new GaussianBlur(gl, size, size);
+        const frameBufferTex = new FrameBufferTexture(gl, size, size);
+        const flatWhiteShader = getShaders(gl).flatWhite;
 
-        gl.useProgram(this.shader);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, frameBufferTex.framebuffer);
+        gl.viewport(0, 0, size, size);
+        gl.clearColor(0, 0, 0, 1);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+        gl.useProgram(flatWhiteShader);
 
         gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
+        const posLoc = gl.getAttribLocation(flatWhiteShader, "i_position");
+        gl.enableVertexAttribArray(posLoc);
+        gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
 
-        const posLoc = gl.getAttribLocation(this.shader, "i_position");
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
+        gl.drawElements(gl.TRIANGLES, this.indexBufferLen, gl.UNSIGNED_SHORT, 0);
+
+        gaussBlur0.run(frameBufferTex.texture, 30);
+
+        gl.bindFramebuffer(gl.FRAMEBUFFER, frameBufferTex.framebuffer);
+        gl.viewport(0, 0, size, size);
+
+        normalsBlit.draw(gaussBlur0.resultTexture, (gl, shader) => {
+            gl.uniform2f(gl.getUniformLocation(shader, "u_resolution"), size, size);
+        });
+
+        gaussBlur1.run(frameBufferTex.texture, 2);
+
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+        gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+
+        normalsBlit.release();
+        const depth = gaussBlur0.releaseTexture();
+        const normal = gaussBlur1.releaseTexture();
+
+        return { depth, normal };
+    };
+
+    get surfaceInfoBuffers() {
+        return this._surfaceInfoBuffers;
+    }
+
+    drawDemo(t: number, zoom: number, x: number, y: number) {
+        const gl = this.gl;
+        const shader = getShaders(gl).caveDemo;
+
+        gl.useProgram(shader);
+
+        gl.uniform1f(gl.getUniformLocation(shader, "u_time"), t);
+        gl.uniform1f(gl.getUniformLocation(shader, "u_zoom"), zoom);
+        gl.uniform2f(gl.getUniformLocation(shader, "u_pointLightPos"), x, y);
+
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, this._surfaceInfoBuffers.depth);
+        gl.uniform1i(gl.getUniformLocation(shader, "u_depth"), 0);
+
+        gl.activeTexture(gl.TEXTURE1);
+        gl.bindTexture(gl.TEXTURE_2D, this._surfaceInfoBuffers.normal);
+        gl.uniform1i(gl.getUniformLocation(shader, "u_normal"), 1);
+
+        gl.activeTexture(gl.TEXTURE2);
+        gl.bindTexture(gl.TEXTURE_2D, this.normalsTexture);
+        gl.uniform1i(gl.getUniformLocation(shader, "u_normalRocks"), 2);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
+        const posLoc = gl.getAttribLocation(shader, "i_position");
         gl.enableVertexAttribArray(posLoc);
         gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
 
@@ -57,37 +134,32 @@ export class CaveRenderer {
         gl.drawElements(gl.TRIANGLES, this.indexBufferLen, gl.UNSIGNED_SHORT, 0);
     }
 
-    // TODO this should be default draw function
-    drawNice(ta: WebGLTexture, tb: WebGLTexture, tex: WebGLTexture, t: number, zoom: number, x: number, y: number) {
+    draw(tex: WebGLTexture, t: number, zoom: number, x: number, y: number) {
         const gl = this.gl;
+        const shader = getShaders(gl).caveDemo;
 
-        gl.useProgram(this.shader);
+        gl.useProgram(shader);
 
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
-
-        const posLoc = gl.getAttribLocation(this.shader, "i_position");
-        gl.enableVertexAttribArray(posLoc);
-        gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
-
-        const mvp = mat4.identity(mat4.create());
-        mat4.perspective(mvp, Math.PI / 2, 1, .01, 100);
-        gl.uniformMatrix4fv(gl.getUniformLocation(this.shader, "u_mvp"), false, mvp);
-
-        gl.uniform1f(gl.getUniformLocation(this.shader, "u_time"), t);
-        gl.uniform1f(gl.getUniformLocation(this.shader, "u_zoom"), zoom);
-        gl.uniform2f(gl.getUniformLocation(this.shader, "u_pointLightPos"), x, y);
+        gl.uniform1f(gl.getUniformLocation(shader, "u_time"), t);
+        gl.uniform1f(gl.getUniformLocation(shader, "u_zoom"), zoom);
+        gl.uniform2f(gl.getUniformLocation(shader, "u_pointLightPos"), x, y);
 
         gl.activeTexture(gl.TEXTURE0);
-        gl.bindTexture(gl.TEXTURE_2D, ta);
-        gl.uniform1i(gl.getUniformLocation(this.shader, "u_depth"), 0);
+        gl.bindTexture(gl.TEXTURE_2D, this._surfaceInfoBuffers.depth);
+        gl.uniform1i(gl.getUniformLocation(shader, "u_depth"), 0);
 
         gl.activeTexture(gl.TEXTURE1);
-        gl.bindTexture(gl.TEXTURE_2D, tb);
-        gl.uniform1i(gl.getUniformLocation(this.shader, "u_normal"), 1);
+        gl.bindTexture(gl.TEXTURE_2D, this._surfaceInfoBuffers.normal);
+        gl.uniform1i(gl.getUniformLocation(shader, "u_normal"), 1);
 
         gl.activeTexture(gl.TEXTURE2);
         gl.bindTexture(gl.TEXTURE_2D, tex);
-        gl.uniform1i(gl.getUniformLocation(this.shader, "u_normalRocks"), 2);
+        gl.uniform1i(gl.getUniformLocation(shader, "u_normalRocks"), 2);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
+        const posLoc = gl.getAttribLocation(shader, "i_position");
+        gl.enableVertexAttribArray(posLoc);
+        gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
 
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
         gl.drawElements(gl.TRIANGLES, this.indexBufferLen, gl.UNSIGNED_SHORT, 0);
@@ -102,5 +174,7 @@ export class CaveRenderer {
 
         gl.deleteBuffer(this.vertexBuffer);
         gl.deleteBuffer(this.indexBuffer);
+
+        // TODO delete the surface info buffers
     }
 }

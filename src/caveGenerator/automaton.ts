@@ -1,4 +1,4 @@
-import { nextRandom01 } from 'utils/prng';
+import { PRNG } from 'utils/prng';
 import { WriteGrid, Grid } from 'utils/grid';
 
 const getNeighborhood = (map: Grid<boolean>, x: number, y: number): number => {
@@ -18,15 +18,13 @@ const getNeighborhood = (map: Grid<boolean>, x: number, y: number): number => {
 export const runCellularAutomaton = (width: number, height: number, seed: number, population: number, birth: number, survival: number, iterations: number): Grid<boolean> => {
     const result = new WriteGrid<boolean>(width, height);
     const buffer = new WriteGrid<boolean>(width, height);
-    let rand = nextRandom01(seed / 101);
+    const rng = new PRNG(seed);
 
     for (let x = 0; x < width; ++x) {
         for (let y = 0; y < height; ++y) {
-            const fill = x === 0 || y === 0 || x === width-1 || y === height-1 || rand < population;
+            const fill = x === 0 || y === 0 || x === width-1 || y === height-1 || rng.next() < population;
             result.write(x, y, fill);
             buffer.write(x, y, fill);
-
-            rand = nextRandom01(rand);
         }
     }
 

@@ -1,6 +1,7 @@
 //foreach_shader import * as $ from './$.glsl';
 import * as bufferCopy from './bufferCopy.glsl';//_generated
 import * as cave from './cave.glsl';//_generated
+import * as caveDemo from './caveDemo.glsl';//_generated
 import * as flatWhite from './flatWhite.glsl';//_generated
 import * as gaussianBlur from './gaussianBlur.glsl';//_generated
 import * as normals from './normals.glsl';//_generated
@@ -10,6 +11,7 @@ interface ShaderCollection {
     //foreach_shader readonly $: WebGLShader;
     readonly bufferCopy: WebGLShader;//_generated
     readonly cave: WebGLShader;//_generated
+    readonly caveDemo: WebGLShader;//_generated
     readonly flatWhite: WebGLShader;//_generated
     readonly gaussianBlur: WebGLShader;//_generated
     readonly normals: WebGLShader;//_generated
@@ -20,6 +22,7 @@ const buildCollection = (gl: WebGLRenderingContext): ShaderCollection => ({
     //foreach_shader $: compileShader(gl, '$', $),
     bufferCopy: compileShader(gl, 'bufferCopy', bufferCopy),//_generated
     cave: compileShader(gl, 'cave', cave),//_generated
+    caveDemo: compileShader(gl, 'caveDemo', caveDemo),//_generated
     flatWhite: compileShader(gl, 'flatWhite', flatWhite),//_generated
     gaussianBlur: compileShader(gl, 'gaussianBlur', gaussianBlur),//_generated
     normals: compileShader(gl, 'normals', normals),//_generated

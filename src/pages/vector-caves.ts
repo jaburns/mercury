@@ -7,10 +7,10 @@ import { CaveRenderer } from "webgl/caveRenderer";
 import { BufferRenderer } from 'webgl/bufferRenderer';
 import { loadTexture } from 'webgl/textureLoader';
 import { getShaders } from 'shaders';
-import { buildSurfaceInfoBuffers } from 'webgl/caveSurfaceInfo';
+import { PRNG } from 'utils/prng';
 
 const drawInfoBufferDemo = (cave: Cave, kind: 'depth'|'normal', gl: WebGLRenderingContext): void => {
-    const infoBuffers = buildSurfaceInfoBuffers(gl, 1024, cave);
+    const infoBuffers = new CaveRenderer(gl, cave, null).surfaceInfoBuffers;
     const copyBlit = new BufferRenderer(gl, getShaders(gl).bufferCopy);
 
     copyBlit.draw(kind === 'depth' ? infoBuffers.depth : infoBuffers.normal);
@@ -38,9 +38,7 @@ const drawDetailedCaveDemo = (cave: Cave, gl: WebGLRenderingContext): void => {
 
     loadTexture(gl, "caveWalls.png", gl.REPEAT)
     .then(normTex => {
-        const caveRenderer = new CaveRenderer(gl, cave, getShaders(gl).cave);
-        const infoBuffers = buildSurfaceInfoBuffers(gl, 1024, cave);
-
+        const caveRenderer = new CaveRenderer(gl, cave, normTex);
         const startTime = Date.now();
 
         const render = (): void => {
@@ -52,7 +50,7 @@ const drawDetailedCaveDemo = (cave: Cave, gl: WebGLRenderingContext): void => {
             if (mouseDown) zoomT += 0.02;
             const zoom = 0.55 + 0.45 * Math.cos(zoomT);
 
-            caveRenderer.drawNice(infoBuffers.depth, infoBuffers.normal, normTex, t, zoom, mousePos.x, mousePos.y);
+            caveRenderer.drawDemo(t, zoom, mousePos.x, mousePos.y);
 
             requestAnimationFrame(render);
         };
@@ -126,7 +124,7 @@ export const initPost = () :void => {
     };
 
     const update = () :void => {
-        seed = Math.random();
+        seed = PRNG.getRandomSeed();
 
         updatePartialAutomatonResult();
 
