@@ -25,6 +25,9 @@ varying vec4 v_worldPos;
 #endif
 #ifdef FRAGMENT
 
+    #define BASE_RADIUS 0.25
+    #define FADE_RADIUS 2.75
+
     mat3 axisAngle(vec3 normalizedAxis, float angle)
     {
         float x = normalizedAxis.x;
@@ -44,10 +47,9 @@ varying vec4 v_worldPos;
     float ptLightAmount(vec2 pos, vec2 normal)
     {
         vec2 toPtLight = pos - u_shipWorldPos.xy;
-        float ptLightIntensity = 1.;
-        float lightAmount = clamp(dot(normalize(toPtLight), normal), 0., 1.);
-        float distToPtLight = .3 * length(toPtLight);
-        return lightAmount * ptLightIntensity / max(1., distToPtLight * distToPtLight);
+        float intensity = clamp((1. + BASE_RADIUS) - length(toPtLight) / FADE_RADIUS, 0., 1.);
+        float reflectedLight = clamp(dot(normalize(toPtLight), normal), 0., 1.);
+        return intensity * reflectedLight;
     }
 
     void main()

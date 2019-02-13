@@ -150,7 +150,11 @@ export class CaveRenderer {
         mat4.identity(this.mvpMatrix);
         mat4.scale(this.mvpMatrix, this.mvpMatrix, CaveRenderer.CAVE_SCALE);
         gl.uniformMatrix4fv(gl.getUniformLocation(shader, "u_model"), false, this.mvpMatrix);
-        mat4.mul(this.mvpMatrix, camera.vpMatrix, this.mvpMatrix);
+
+        const mx = Camera.getViewMatrix(camera, mat4.create());
+        mat4.mul(this.mvpMatrix, mx, this.mvpMatrix);
+        Camera.getProjectionMatrix(camera, mx);
+        mat4.mul(this.mvpMatrix, mx, this.mvpMatrix);
         gl.uniformMatrix4fv(gl.getUniformLocation(shader, "u_mvp"), false, this.mvpMatrix);
 
         gl.uniform1f(gl.getUniformLocation(shader, "u_time"), 0);

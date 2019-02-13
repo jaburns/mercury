@@ -6,17 +6,13 @@ export interface Transform {
     scale: vec3;
 }
 
-interface TransformStatic {
-    create: () => Transform;
-    toMatrix: (out: mat4, t: Transform) => mat4;
-};
-
-export const Transform: TransformStatic = {
-    create: () => ({
+export const Transform = {
+    create: (): Transform => ({
         position: vec3.create(),
         rotation: quat.create(),
         scale: vec3.fromValues(1, 1, 1),
     }),
 
-    toMatrix: (out, t) => mat4.fromRotationTranslationScale(out, t.rotation, t.position, t.scale),
+    toMatrix: (self: Readonly<Transform>, out: mat4): mat4 =>
+        mat4.fromRotationTranslationScale(out, self.rotation, self.position, self.scale),
 };
