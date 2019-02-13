@@ -1,11 +1,11 @@
 import { Cave } from 'caveGenerator';
 import flatten = require('lodash/flatten');
 import { getShaders } from 'shaders';
-import { BufferRenderer } from './bufferRenderer';
-import { GaussianBlur } from './gaussianBlur';
-import { FrameBufferTexture } from './frameBufferTexture';
+import { BufferRenderer } from 'graphics/bufferRenderer';
+import { GaussianBlur } from 'graphics/gaussianBlur';
+import { FrameBufferTexture } from 'graphics/frameBufferTexture';
 import { mat4, vec3 } from 'gl-matrix';
-import { Camera } from './camera';
+import { Camera } from 'graphics/camera';
 
 export interface SurfaceInfoBuffers {
     readonly depth: WebGLTexture,
@@ -29,6 +29,9 @@ const getFlatIndices = (cave: Cave): number[] => {
     return result;
 };
 
+const mxa = mat4.create();
+const mxb = mat4.create();
+
 export class CaveRenderer {
     static readonly SURFACE_INFO_BUFFER_SIZE = 1024;
     static readonly CAVE_SIZE = 20;
@@ -40,7 +43,6 @@ export class CaveRenderer {
     private readonly indexBufferLen: number;
     private readonly normalsTexture: WebGLTexture | null;
     private readonly _surfaceInfoBuffers: SurfaceInfoBuffers;
-    private readonly mvpMatrix: mat4;
 
     constructor(gl: WebGLRenderingContext, cave: Cave, normalsTexture: WebGLTexture | null) {
         this.gl = gl;
@@ -58,8 +60,6 @@ export class CaveRenderer {
         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indexBufferData), gl.STATIC_DRAW);
 
         this._surfaceInfoBuffers = this.buildSurfaceInfoBuffers(CaveRenderer.SURFACE_INFO_BUFFER_SIZE);
-
-        this.mvpMatrix = mat4.create();
     }
 
     private buildSurfaceInfoBuffers(size: number): SurfaceInfoBuffers {
@@ -147,15 +147,15 @@ export class CaveRenderer {
 
         gl.useProgram(shader);
 
-        mat4.identity(this.mvpMatrix);
-        mat4.scale(this.mvpMatrix, this.mvpMatrix, CaveRenderer.CAVE_SCALE);
-        gl.uniformMatrix4fv(gl.getUniformLocation(shader, "u_model"), false, this.mvpMatrix);
+        mat4.identity(mxa); // mxa -> MVP matrix
+        mat4.scale(mxa, mxa, CaveRenderer.CAVE_SCALE);
+        gl.uniformMatrix4fv(gl.getUniformLocation(shader, "u_model"), false, mxa);
 
-        const mx = Camera.getViewMatrix(camera, mat4.create());
-        mat4.mul(this.mvpMatrix, mx, this.mvpMatrix);
-        Camera.getProjectionMatrix(camera, mx);
-        mat4.mul(this.mvpMatrix, mx, this.mvpMatrix);
-        gl.uniformMatrix4fv(gl.getUniformLocation(shader, "u_mvp"), false, this.mvpMatrix);
+        Camera.getViewMatrix(camera, mxb);
+        mat4.mul(mxa, mxb, mxa);
+        Camera.getProjectionMatrix(camera, mxb);
+        mat4.mul(mxa, mxb, mxa);
+        gl.uniformMatrix4fv(gl.getUniformLocation(shader, "u_mvp"), false, mxa);
 
         gl.uniform1f(gl.getUniformLocation(shader, "u_time"), 0);
         gl.uniform3fv(gl.getUniformLocation(shader, "u_shipWorldPos"), shipWorldPos);

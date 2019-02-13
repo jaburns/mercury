@@ -1,11 +1,11 @@
 import { generateCave } from "caveGenerator";
-import { CaveRenderer } from "webgl/caveRenderer";
-import { loadTexture } from "webgl/textureLoader";
-import { ShipRenderer } from "webgl/shipRenderer";
-import { PRNG } from "utils/prng";
-import { Camera } from "webgl/camera";
-import { Transform } from "webgl/transform";
+import { CaveRenderer } from "game/render/caveRenderer";
+import { loadTexture } from "graphics/textureLoader";
+import { ShipRenderer } from "game/render/shipRenderer";
+import { Camera } from "graphics/camera";
+import { Transform } from "graphics/transform";
 import { vec2, quat, vec3 } from "gl-matrix";
+import { InputGrabber } from "utils/inputGrabber";
 
 interface LazyResources {
     readonly caveTexture: WebGLTexture;
@@ -19,41 +19,7 @@ const loadResources = (gl: WebGLRenderingContext): Promise<LazyResources> =>
         caveTexture
     }));
 
-class InputGrabber {
-    private readonly canvas: HTMLCanvasElement;
-    private _mouseDown: boolean;
-    readonly mousePos: vec2;
-
-    constructor(canvas: HTMLCanvasElement) {
-        this.canvas = canvas;
-        this._mouseDown = false;
-        this.mousePos = vec2.create();
-
-        canvas.addEventListener('mousemove',  this.onMouseMove.bind(this));
-        canvas.addEventListener('mousedown',  this.onMouseDown.bind(this));
-        canvas.addEventListener('mouseup',    this.onMouseButtonNegative.bind(this));
-        canvas.addEventListener('mouseout',   this.onMouseButtonNegative.bind(this));
-        canvas.addEventListener('mouseleave', this.onMouseButtonNegative.bind(this));
-    }
-
-    get mouseDown(): boolean {
-        return this._mouseDown;
-    }
-
-    private onMouseDown() {
-        this._mouseDown = true;
-    }
-
-    private onMouseButtonNegative() {
-        this._mouseDown = false;
-    }
-
-    private onMouseMove(e: MouseEvent) {
-        const rect = this.canvas.getBoundingClientRect();
-        this.mousePos[0] = (e.clientX - rect.left) / this.canvas.width;
-        this.mousePos[1] = 1 - (e.clientY - rect.top)  / this.canvas.height;
-    }
-}
+const v3a = vec3.create();
 
 export const initGame = (): void => {
     const canvas = document.getElementById('game-canvas') as HTMLCanvasElement;
@@ -74,12 +40,12 @@ export const initGame = (): void => {
         const update = () => {
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-            quat.fromEuler(shipTransform.rotation, 0, 0, 180 / Math.PI * Math.atan2(inputs.mousePos[1], inputs.mousePos[0]));
+            const mouseWorldPos = Camera.screenPointToWorldXYPlanePoint(camera, inputs.mouseScreenPoint, v3a);
+            vec3.sub(v3a, mouseWorldPos, shipTransform.position);
+            quat.fromEuler(shipTransform.rotation, 0, 0, 180 / Math.PI * Math.atan2(v3a[1], v3a[0]));
 
             caveRenderer.draw(camera, shipTransform.position);
             shipRenderer.draw(camera, shipTransform);
-
-            console.log(Camera.screenPointToRay(camera, inputs.mousePos, shipTransform.position));
 
             requestAnimationFrame(update);
         };
