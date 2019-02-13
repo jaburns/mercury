@@ -1,4 +1,4 @@
-import { Grid, WriteGrid, GridTool, safeOutOfBounds } from 'utils/grid';
+import { WriteGrid, Grid, safeOutOfBounds } from 'utils/grid';
 import { runCellularAutomaton } from './automaton';
 import { markEdges, findContours, EdgeMarkedMapTile, FindContoursResult } from './findContours';
 import { smoothCurve } from './smoothCurve';
@@ -46,7 +46,7 @@ const colorGridRegions = (grid: WriteGrid<number>): number => {
     let largestRegion = 0;
 
     while (true) {
-        const pos = GridTool.find(grid, (x, y, val) => val === 0);
+        const pos = Grid.find(grid, (x, y, val) => val === 0);
         if (pos === null) return largestColor;
 
         const size = floodFill(grid, pos.x, pos.y, 0, color, 0);
@@ -61,7 +61,7 @@ const colorGridRegions = (grid: WriteGrid<number>): number => {
 };
 
 const fixSingleTileBridges = (grid: WriteGrid<boolean>): void => {
-    GridTool.forEach(safeOutOfBounds(grid, true), (x, y, val) => {
+    Grid.forEach(safeOutOfBounds(grid, true), (x, y, val) => {
         if (!val) return;
 
         if (val && !grid.at(x - 1, y) && !grid.at(x + 1, y)) {
@@ -83,10 +83,10 @@ export const generatePartialAutomatonResult = (seed: number, generation: number)
 export const generateCaveVerbose = (seed: number): { cave: Cave, details: CaveBuildDetails } => {
     const automatonResult = runCellularAutomaton(75, 75, seed, 0.48, 5, 4, 30);
 
-    const coloredGrid = GridTool.map(automatonResult, (x, y, val) => val ? -1 : 0);
+    const coloredGrid = Grid.map(automatonResult, (x, y, val) => val ? -1 : 0);
     const bigColor = colorGridRegions(coloredGrid);
 
-    const filledGrid = GridTool.map(coloredGrid, (x, y, val) => val !== bigColor);
+    const filledGrid = Grid.map(coloredGrid, (x, y, val) => val !== bigColor);
     fixSingleTileBridges(filledGrid);
 
     const edgeMarkedGrid = markEdges(filledGrid);

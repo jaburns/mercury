@@ -1,4 +1,4 @@
-import { Grid, WriteGrid, GridTool, safeOutOfBounds } from 'utils/grid';
+import { WriteGrid, Grid, safeOutOfBounds } from 'utils/grid';
 import { smallestDifferenceRadians } from 'utils/math';
 import { vec2 } from 'gl-matrix';
 
@@ -8,7 +8,7 @@ export interface EdgeMarkedMapTile {
 }
 
 export const markEdges = (grid: Grid<boolean>): WriteGrid<EdgeMarkedMapTile> => {
-    const result = GridTool.map(grid, (x, y, val): EdgeMarkedMapTile => 
+    const result = Grid.map(grid, (x, y, val): EdgeMarkedMapTile => 
         ({ kind: val ? 'dirt' : 'air', normal: 0 }));
 
     for (let x = 0; x < grid.width; x++) {
@@ -62,7 +62,7 @@ export interface FindContoursResult {
 
 export const findContours = (grid: Grid<EdgeMarkedMapTile>, spaceInsurance: 0 | 1 | 2): FindContoursResult => {
     const MAX_ITER = 100;
-    const walkMap = GridTool.map(new WriteGrid<WalkedStatus>(grid.width, grid.height), _ => WalkedStatus.Unwalked);
+    const walkMap = Grid.map(new WriteGrid<WalkedStatus>(grid.width, grid.height), _ => WalkedStatus.Unwalked);
     const contours: vec2[][] = [];
 
     let iter = 0;

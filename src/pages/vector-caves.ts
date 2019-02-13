@@ -1,5 +1,5 @@
 import { generateCaveVerbose, generatePartialAutomatonResult } from 'caveGenerator';
-import { GridTool } from 'utils/grid';
+import { Grid } from 'utils/grid';
 import { WalkedStatus } from 'caveGenerator/findContours';
 import { vec2 } from 'gl-matrix';
 import { Cave } from 'caveGenerator';
@@ -117,7 +117,7 @@ export const initPost = () :void => {
         const generation =parseFloat(genSlider.value);
         const grid = generatePartialAutomatonResult(seed, generation);
 
-        GridTool.forEach(grid, (x, y, val) => {
+        Grid.forEach(grid, (x, y, val) => {
             ctx0.fillStyle = val ? '#000' : '#FFF';
             ctx0.fillRect(4*x, 4*y, 4, 4);
         });
@@ -131,29 +131,29 @@ export const initPost = () :void => {
         const { cave, details } = generateCaveVerbose(seed);
         caveCache = cave;
 
-        GridTool.forEach(details.automatonResult, (x, y, val) => {
+        Grid.forEach(details.automatonResult, (x, y, val) => {
             ctx.fillStyle = val ? '#000' : '#FFF';
             ctx.fillRect(4*x, 4*y, 4, 4);
         });
 
-        GridTool.forEach(details.coloredGrid, (x, y, val) => {
+        Grid.forEach(details.coloredGrid, (x, y, val) => {
             ctx2.fillStyle = gridColorForNumber(val);
             ctx2.fillRect(4*x, 4*y, 4, 4);
         });
 
-        GridTool.forEach(details.filledGrid, (x, y, val) => {
+        Grid.forEach(details.filledGrid, (x, y, val) => {
             ctx3.fillStyle = val ? '#000' : '#FFF';
             ctx3.fillRect(4*x, 4*y, 4, 4);
         });
 
-        GridTool.forEach(details.edgeMarkedGrid, (x, y, val) => {
+        Grid.forEach(details.edgeMarkedGrid, (x, y, val) => {
             ctx4.fillStyle = val.kind === 'edge' ? gridColorForNormal(val.normal) : val.kind === 'air' ? '#655' : '#77f';
             ctx4.fillRect(4*x, 4*y, 4, 4);
         });
 
         const contours = details.findContoursResult;
 
-        GridTool.forEach(contours.walkMap, (x, y, val) => {
+        Grid.forEach(contours.walkMap, (x, y, val) => {
             ctx5.fillStyle = val === WalkedStatus.WalkedImportant ? '#fff' : val === WalkedStatus.Walked ? '#333' : '#000';
             ctx5.fillRect(4*x, 4*y, 4, 4);
 

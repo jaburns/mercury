@@ -42,7 +42,7 @@ export const safeOutOfBounds = <T>(grid: Grid<T>, oobValue: T): Grid<T> => ({
     at: (x, y) => x < 0 || y < 0 || x >= grid.width || y >= grid.width ? oobValue : grid.at(x, y)
 });
 
-export const GridTool = {
+export const Grid = {
     find: <T>(grid: Grid<T>, test: GridMapper<T, boolean>): { x: number, y: number } | null => {
         for (let x = 0; x < grid.width; ++x) {
             for (let y = 0; y < grid.height; ++y) {
