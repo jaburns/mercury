@@ -1,6 +1,12 @@
 import { Transform } from "./transform";
 import { mat4, vec2, vec3, vec4 } from "gl-matrix";
 
+const mxa = mat4.create();
+const v4a = vec4.create();
+const v3a = vec3.create();
+const v3b = vec3.create();
+const v3c = vec3.create();
+
 export interface Camera {
     transform: Transform;
     aspectRatio: number;
@@ -8,12 +14,6 @@ export interface Camera {
     near: number;
     far: number;
 }
-
-const mxa = mat4.create();
-const v4a = vec4.create();
-const v3a = vec3.create();
-const v3b = vec3.create();
-const v3c = vec3.create();
 
 export const Camera = {
     create: (): Camera => ({

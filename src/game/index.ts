@@ -2,6 +2,9 @@ import { GameRenderer } from "./render/gameRenderer";
 import { Cave, generateCave } from "caveGenerator";
 import { loadTexture } from "graphics/textureLoader";
 import { InputGrabber } from "utils/inputGrabber";
+import { vec3 } from "gl-matrix";
+
+const v3a = vec3.create();
 
 interface LazyResources {
     readonly caveTexture: WebGLTexture;
@@ -16,34 +19,62 @@ const loadResources = (gl: WebGLRenderingContext): Promise<LazyResources> =>
     }));
 
 export class Game {
+    private readonly gl: WebGLRenderingContext;
     private readonly cave: Cave;
+    private readonly inputs: InputGrabber;
     private gameRenderer: GameRenderer;
-    private readonly inputGrabber: InputGrabber;
+    private running: boolean;
+    private onStoppedRunningCallback?: () => void;
 
     constructor(gl: WebGLRenderingContext, seed: number) {
+        this.gl = gl;
         this.cave = generateCave(seed);
-        this.inputGrabber = new InputGrabber(gl.canvas);
+        this.inputs = new InputGrabber(gl.canvas);
+        this.running = false;
 
         loadResources(gl).then(resources => {
             this.gameRenderer = new GameRenderer(gl, this.cave, resources.caveTexture);
+            this.runUpdateLoop();
         });
     }
 
-            requestAnimationFrame(update);
+    private runUpdateLoop() {
+        this.running = true;
+
+        const onAnimationFrame = () => {
+            this.update();
+
+            if (this.running) {
+                requestAnimationFrame(onAnimationFrame);
+            } else {
+                this.stoppedRunning();
+            }
         };
 
-        const onResize = () => {
-            gl.canvas.width = window.innerWidth;
-            gl.canvas.height = window.innerHeight;
-            gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-            Camera.updateAspectRatio(camera, gl.canvas.width, gl.canvas.height);
-        };
+        onAnimationFrame();
+    }
 
-        window.addEventListener('resize', onResize);
-        onResize();
-        update();
-    });
-};
+    private update() {
+        this.gameRenderer.draw(this.inputs.mouseScreenPoint);
+    }
 
+    private stoppedRunning() {
+        this.gameRenderer.release();
+        this.inputs.release();
+
+        if (this.onStoppedRunningCallback) {
+            this.onStoppedRunningCallback();
+        }
+    }
+
+    notifyCanvasResize() {
+        if (this.gameRenderer) {
+            this.gameRenderer.notifyCanvasResize();
+        }
+    }
+
+    release(stoppedCallback?: () => void) {
+        this.onStoppedRunningCallback = stoppedCallback;
+        this.running = false;
     }
 }

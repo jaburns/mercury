@@ -7,6 +7,9 @@ import { FrameBufferTexture } from 'graphics/frameBufferTexture';
 import { mat4, vec3 } from 'gl-matrix';
 import { Camera } from 'graphics/camera';
 
+const mxa = mat4.create();
+const mxb = mat4.create();
+
 export interface SurfaceInfoBuffers {
     readonly depth: WebGLTexture,
     readonly normal: WebGLTexture,
@@ -28,9 +31,6 @@ const getFlatIndices = (cave: Cave): number[] => {
 
     return result;
 };
-
-const mxa = mat4.create();
-const mxb = mat4.create();
 
 export class CaveRenderer {
     static readonly SURFACE_INFO_BUFFER_SIZE = 1024;
@@ -184,13 +184,9 @@ export class CaveRenderer {
     release() {
         const gl = this.gl;
 
-        gl.useProgram(null);
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
-        gl.bindBuffer(gl.ARRAY_BUFFER, null);
-
         gl.deleteBuffer(this.vertexBuffer);
         gl.deleteBuffer(this.indexBuffer);
-
-        // TODO delete the surface info buffers
+        gl.deleteTexture(this._surfaceInfoBuffers.depth);
+        gl.deleteTexture(this._surfaceInfoBuffers.normal);
     }
 }
