@@ -43,4 +43,8 @@ export class InputGrabber {
         this.mouseScreenPoint[0] = (e.clientX - this.canvasBoundingRect.left) / this.canvas.width;
         this.mouseScreenPoint[1] = 1 - (e.clientY - this.canvasBoundingRect.top)  / this.canvas.height;
     }
+
+    release() {
+        // TODO unbind all events
+    }
 }
