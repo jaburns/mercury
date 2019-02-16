@@ -19,5 +19,14 @@
             <p class="index-link"><a href="game.html">Game</a></p>
         </main>
     </body>
-    <script type="text/javascript" src="bundle.js"></script>
+    <script src="bundle.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        if (typeof io === 'undefined') {
+            console.log('No IO oops');
+        } else {
+            console.log('Yes IO oops');
+            const socket = io();
+        }
+    </script>
 </html>
