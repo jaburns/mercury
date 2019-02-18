@@ -1,29 +1,21 @@
-import { Game } from "game";
-import { MachineLocalNetwork } from "networking";
-import { GameServerPacket, GameClientPacket, fromServerSerDe, fromClientSerDe } from "game/packets";
+import { LocalNetwork } from "networking";
+import { GameServer } from "game/server";
+import { GameClient } from "game/client";
+import { ServerPacket, ClientPacket, serverPacketSerializer, clientPacketSerializer } from "game/state";
 
 export const initGame = (): void => {
     const canvas = document.getElementById('game-canvas') as HTMLCanvasElement;
-    const gl = canvas.getContext('webgl') as WebGLRenderingContext;
-    const game = new Game(gl, 1338);
+    const network = new LocalNetwork<ServerPacket, ClientPacket>(serverPacketSerializer, clientPacketSerializer);
 
-    const network = new MachineLocalNetwork<GameServerPacket, GameClientPacket>(fromServerSerDe, fromClientSerDe);
-    const server = network.getServer();
-    const client = network.createClient();
+    const server = new GameServer(network.server);
+    const client = new GameClient(canvas, network.client, 1338);
 
     const onResize = () => {
-        gl.canvas.width = window.innerWidth;
-        gl.canvas.height = window.innerHeight;
-        game.notifyCanvasResize();
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        client.notifyCanvasResize();
     };
 
     window.addEventListener('resize', onResize);
     onResize();
-
-    // on destroy {
-    //    game.release();
-    //    (gl.getExtension('WEBGL_lose_context') as WEBGL_lose_context).loseContext();
-    //    game = null;
-    //    gl = null;
-    // }
 };
