@@ -7,6 +7,7 @@ import { InputGrabber } from "utils/inputGrabber";
 import { vec2, vec3 } from "gl-matrix";
 import { Camera } from "graphics/camera";
 
+const scratchGameState = GameState.create();
 const v3a = vec3.create();
 
 interface LazyResources {
@@ -96,9 +97,8 @@ export class GameClient {
             this.tickAccumulator -= TICK_LENGTH_MS;
         }
 
-        this.gameRenderer.draw(
-            GameState.lerp(this.prevState, this.curState, this.tickAccumulator / TICK_LENGTH_MS)
-        );
+        GameState.lerp(scratchGameState, this.prevState, this.curState, this.tickAccumulator / TICK_LENGTH_MS);
+        this.gameRenderer.draw(scratchGameState);
     }
 
     private readInputs(): PlayerInputs {
@@ -120,7 +120,6 @@ export class GameClient {
         }
     }
 
-    // TODO get this event down in GameRenderer without needing to pass it down
     notifyCanvasResize() {
         if (this.gameRenderer) {
             this.gameRenderer.notifyCanvasResize();

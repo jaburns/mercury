@@ -24,6 +24,9 @@ export const smallestDifferenceRadians = (a: number, b: number): number => {
     return a - b;
 };
 
+export const lerpRadians = (a: number, b: number, t: number): number =>
+    a + t * smallestDifferenceRadians(b, a);
+
 export const findBounds = (pts: ReadonlyArray<vec2>): Rect => {
     const result: Rect = { xmin: Infinity, ymin: Infinity, xmax: -Infinity, ymax: -Infinity };
 

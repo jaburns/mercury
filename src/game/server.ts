@@ -1,8 +1,5 @@
 import { NetConnection, TICK_LENGTH_MS } from "networking";
 import { ClientPacket, ServerPacket, GameState } from "./state";
-import { vec2 } from "gl-matrix";
-
-const v2a = vec2.create();
 
 export class GameServer {
     private readonly net: NetConnection<ServerPacket, ClientPacket>;
@@ -12,7 +9,7 @@ export class GameServer {
     constructor(net: NetConnection<ServerPacket, ClientPacket>) {
         this.net = net;
         this.tickIntervalID = setInterval(this.tick.bind(this), TICK_LENGTH_MS);
-        this.state = GameState.clone(GameState.zero);
+        this.state = GameState.create();
     }
 
     private tick() {
@@ -20,8 +17,7 @@ export class GameServer {
 
         if (newPackets.length > 0) {
             const latestInputPacket = newPackets[newPackets.length - 1];
-            vec2.sub(v2a, latestInputPacket.mouseWorldPos, this.state.shipPos);
-            this.state.shipAngle = Math.atan2(v2a[1], v2a[0]);
+            GameState.step(this.state, this.state, latestInputPacket);
         }
 
         this.net.sendPacket(this.state);
