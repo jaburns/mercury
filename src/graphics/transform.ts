@@ -1,4 +1,5 @@
 import { vec3, quat, mat4 } from "gl-matrix";
+import { DeepReadonly } from "ts-essentials";
 
 export interface Transform {
     position: vec3;
@@ -13,6 +14,6 @@ export const Transform = {
         scale: vec3.fromValues(1, 1, 1),
     }),
 
-    toMatrix: (self: Readonly<Transform>, out: mat4): mat4 =>
-        mat4.fromRotationTranslationScale(out, self.rotation, self.position, self.scale),
+    toMatrix: (self: DeepReadonly<Transform>, out: mat4): mat4 =>
+        mat4.fromRotationTranslationScale(out, (self.rotation as quat), (self.position as vec3), (self.scale as vec3)),
 };

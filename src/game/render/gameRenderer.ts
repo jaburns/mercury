@@ -6,15 +6,16 @@ import { Transform } from 'graphics/transform';
 import { vec3, quat } from 'gl-matrix';
 import { GameState } from 'game/state';
 
-const qua = quat.create();
+const trx = Transform.create();
+const qux = quat.create();
 
 export class GameRenderer {
     private readonly gl: WebGLRenderingContext;
     private readonly caveRenderer: CaveRenderer;
     private readonly shipRenderer: ShipRenderer;
-    private readonly shipTransform: Transform;
     private readonly _camera: Camera;
 
+    // TODO replace all instances of Readonly with DeepReadonly in project
     get camera(): Readonly<Camera> {
         return this._camera;
     }
@@ -23,7 +24,6 @@ export class GameRenderer {
         this.gl = gl;
         this.caveRenderer = new CaveRenderer(gl, cave, normalsTexture);
         this.shipRenderer = new ShipRenderer(gl);
-        this.shipTransform = Transform.create();
         this._camera = Camera.create();
 
         this._camera.transform.position[2] = 5;
@@ -37,13 +37,20 @@ export class GameRenderer {
 
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-        this.shipTransform.position[0] = state.shipPos[0];
-        this.shipTransform.position[1] = state.shipPos[1];
+        trx.position
 
-        quat.fromEuler(this.shipTransform.rotation, 0, 0, 180 / Math.PI * state.shipAngle);
+        trx.position[0] = state.shipPos[0];
+        trx.position[1] = state.shipPos[1];
 
-        this.caveRenderer.draw(this._camera, this.shipTransform.position);
-        this.shipRenderer.draw(this._camera, this.shipTransform);
+        quat.fromEuler(trx.rotation, 0, 0, 180 / Math.PI * state.shipAngle);
+
+        this.caveRenderer.draw(this._camera, trx.position);
+        this.shipRenderer.draw(this._camera, trx);
+
+        trx.position[0] = 0;
+        trx.position[1] = 0;
+
+        this.shipRenderer.draw(this._camera, trx);
     }
 
     notifyCanvasResize() {

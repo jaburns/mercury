@@ -2,6 +2,7 @@ import { vec3, mat4, quat } from "gl-matrix";
 import { getShaders } from "shaders";
 import { Transform } from "graphics/transform";
 import { Camera } from "graphics/camera";
+import { DeepReadonly } from 'ts-essentials';
 
 const mxa = mat4.create();
 const mxb = mat4.create();
@@ -26,7 +27,7 @@ export class ShipRenderer {
         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(tris), gl.STATIC_DRAW);
     }
 
-    draw(camera: Camera, ship: Transform) {
+    draw(camera: DeepReadonly<Camera>, ship: DeepReadonly<Transform>) {
         const gl = this.gl;
         const shader = getShaders(gl).ship;
 
