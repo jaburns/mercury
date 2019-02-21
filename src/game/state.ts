@@ -21,17 +21,15 @@ export const serverPacketSerializer = createSimpleSerializer<ServerPacket>();
 export const clientPacketSerializer = createSimpleSerializer<ClientPacket>();
 
 export const GameState = {
-    create: (): GameState => 
-        GameState.clone(GameState.zero),
-
-    // TODO: don't need this, just use create()
-    zero: {
+    create: (): GameState => ({
         shipPos: vec2.create(),
-    } as Readonly<GameState>,
+        shipAngle: 0,
+    }),
 
-    clone: (a: GameState): GameState => {
-        return JSON.parse(JSON.stringify(a));
-    },
+    clone: (a: GameState): GameState => ({
+        shipPos: vec2.clone(a.shipPos),
+        shipAngle: a.shipAngle,
+    }),
 
     lerp: (out: GameState, a: GameState, b: GameState, t: number): GameState => {
         vec2.lerp(out.shipPos, a.shipPos, b.shipPos, t);

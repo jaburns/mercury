@@ -1,7 +1,11 @@
+export interface PacketWithSender<T> {
+    senderId: string;
+    packet: T;
+}
 
 export interface NetConnection<Send, Receive> {
     readonly id: string;
-    receivePackets(): Receive[];
+    receivePackets(): PacketWithSender<Receive>[];
     sendPacket(packet: Send): void;
 }
 
@@ -17,54 +21,69 @@ export const createSimpleSerializer = <T>(): SerDe<T> => ({
 
 export const TICK_LENGTH_MS = 33;
 
-export class LocalNetwork<FromServer, FromClient> {
-    private readonly fromServerSerDe: SerDe<FromServer>;
-    private readonly fromClientSerDe: SerDe<FromClient>;
+export class LocalNetwork<ToClient, ToServer> {
+    private readonly toClientSerDe: SerDe<ToClient>;
+    private readonly toServerSerDe: SerDe<ToServer>;
 
-    private readonly fromClientQueue: FromClient[];
-    private readonly fromServerQueue: FromServer[];
+    private readonly toServerQueue:  PacketWithSender<ToServer>[];
+    private readonly toClientQueues: {[clientId: string]: PacketWithSender<ToClient>[]};
 
-    readonly server: NetConnection<FromServer, FromClient>;
-    readonly client: NetConnection<FromClient, FromServer>;
-    // TODO support multiple clients
+    readonly server: NetConnection<ToClient, ToServer>;
+    private readonly clients: {[clientId: string]: NetConnection<ToServer, ToClient>};
 
-    constructor(fromServerSerDe: SerDe<FromServer>, fromClientSerDe: SerDe<FromClient>) {
-        this.fromServerSerDe = fromServerSerDe;
-        this.fromClientSerDe = fromClientSerDe;
+    constructor(toClientSerDe: SerDe<ToClient>, toServerSerDe: SerDe<ToServer>) {
+        this.toClientSerDe = toClientSerDe;
+        this.toServerSerDe = toServerSerDe;
 
-        this.fromClientQueue = [];
-        this.fromServerQueue = [];
+        this.toServerQueue  = [];
+        this.toClientQueues = {};
+
+        this.clients = {};
 
         this.server = {
             id: 'server',
 
-            receivePackets: (): FromClient[] => {
-                const result = this.fromClientQueue.slice();
-                this.fromClientQueue.length = 0;
+            receivePackets: (): PacketWithSender<ToServer>[] => {
+                const result = this.toServerQueue.slice();
+                this.toServerQueue.length = 0;
                 return result;
             },
 
-            sendPacket: (packet: FromServer) => {
-                this.fromServerQueue.push(
-                    this.fromServerSerDe.deserialize(this.fromServerSerDe.serialize(packet))
-                );
+            sendPacket: (packet: ToClient) => {
+                const serialized = this.toClientSerDe.serialize(packet);
+
+                for (let k in this.toClientQueues) {
+                    this.toClientQueues[k].push({
+                        senderId: 'server',
+                        packet: this.toClientSerDe.deserialize(serialized),
+                    });
+                }
             }
         };
+    }
 
-        this.client = {
-            id: 'client',
+    createClient(): NetConnection<ToServer, ToClient> {
+        const id = Math.random().toString(36).substr(2);
 
-            receivePackets: (): FromServer[] => {
-                const result = this.fromServerQueue.slice();
-                this.fromServerQueue.length = 0;
+        this.toClientQueues[id] = [];
+
+        this.clients[id] = {
+            id,
+
+            receivePackets: (): PacketWithSender<ToClient>[] => {
+                const result = this.toClientQueues[id].slice();
+                this.toClientQueues[id].length = 0;
                 return result;
             },
 
-            sendPacket: (packet: FromClient) => {
-                this.fromClientQueue.push(
-                    this.fromClientSerDe.deserialize(this.fromClientSerDe.serialize(packet))
-                );
+            sendPacket: (packet: ToServer) => {
+                this.toServerQueue.push({
+                    senderId: id,
+                    packet: this.toServerSerDe.deserialize(this.toServerSerDe.serialize(packet))
+                });
             }
         };
+
+        return this.clients[id];
     }
 }

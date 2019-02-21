@@ -47,8 +47,8 @@ export class GameClient {
         this.inputs = new InputGrabber(canvas);
         this.running = false;
 
-        this.prevState = GameState.zero;
-        this.curState = GameState.zero;
+        this.prevState = GameState.create();
+        this.curState = GameState.create();
 
         loadResources(gl).then(resources => {
             this.gameRenderer = new GameRenderer(gl, this.cave, resources.caveTexture);
@@ -89,7 +89,7 @@ export class GameClient {
             if (newPackets.length > 0) {
                 const newestPacket = newPackets[newPackets.length - 1];
                 this.prevState = this.curState;
-                this.curState = newestPacket;
+                this.curState = newestPacket.packet;
             }
 
             this.net.sendPacket(latestInputs);

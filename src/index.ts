@@ -1,5 +1,5 @@
 import { initPost as initPost_vectorCaves } from 'pages/vector-caves';
-import { initGame  }from 'pages/game';
+import { initGame, initLocalMultiGame } from 'pages/game';
 
 const postInitters: {[key: string]: () => void} = {
     'vector-caves': initPost_vectorCaves,
@@ -9,3 +9,5 @@ const postInitters: {[key: string]: () => void} = {
     postInitters[name]();
 
 (window as any).initGame = initGame;
+
+(window as any).initLocalMultiGame = initLocalMultiGame;
