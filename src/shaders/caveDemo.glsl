@@ -3,6 +3,7 @@ precision highp float;
 uniform sampler2D u_depth;
 uniform sampler2D u_normal;
 uniform sampler2D u_normalRocks;
+uniform mat4 u_perspective;
 uniform float u_time;
 uniform float u_zoom;
 uniform vec2 u_pointLightPos;
@@ -16,7 +17,7 @@ varying vec2 v_uv;
     void main()
     {
         vec2 pospos = i_position - (2.*u_pointLightPos-1.)*(1. - u_zoom);
-        gl_Position = vec4(pospos, -u_zoom, 1);
+        gl_Position = u_perspective * vec4(pospos, -u_zoom, 1);
         v_uv = i_position.xy*0.5 + 0.5;
     }
 

@@ -2,7 +2,7 @@ import { mat4 } from "gl-matrix";
 import { getShaders } from "shaders";
 import { Transform } from "graphics/transform";
 import { Camera } from "graphics/camera";
-import { DeepReadonly } from 'ts-essentials';
+import { Const } from "utils/lang";
 
 const m4x = mat4.create();
 const m4y = mat4.create();
@@ -27,7 +27,7 @@ export class ShipRenderer {
         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(tris), gl.STATIC_DRAW);
     }
 
-    draw(camera: DeepReadonly<Camera>, ship: DeepReadonly<Transform>) {
+    draw(camera: Const<Camera>, ship: Const<Transform>) {
         const gl = this.gl;
         const shader = getShaders(gl).ship;
 

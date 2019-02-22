@@ -6,6 +6,7 @@ import { GaussianBlur } from 'graphics/gaussianBlur';
 import { FrameBufferTexture } from 'graphics/frameBufferTexture';
 import { mat4, vec3 } from 'gl-matrix';
 import { Camera } from 'graphics/camera';
+import { Const, unconst } from 'utils/lang';
 
 const m4x = mat4.create();
 const m4y = mat4.create();
@@ -15,10 +16,10 @@ export type SurfaceInfoBuffers = {
     readonly normal: WebGLTexture,
 };
 
-const getFlatVerts = (cave: Cave): number[] =>
+const getFlatVerts = (cave: Const<Cave>): number[] =>
     flatten(flatten(cave.edges).map(x => [x[0], -x[1]]));
 
-const getFlatIndices = (cave: Cave): number[] => {
+const getFlatIndices = (cave: Const<Cave>): number[] => {
     let baseCount = 0;
     let result: number[] = [];
 
@@ -44,7 +45,7 @@ export class CaveRenderer {
     private readonly normalsTexture: WebGLTexture | null;
     private readonly _surfaceInfoBuffers: SurfaceInfoBuffers;
 
-    constructor(gl: WebGLRenderingContext, cave: Cave, normalsTexture: WebGLTexture | null) {
+    constructor(gl: WebGLRenderingContext, cave: Const<Cave>, normalsTexture: WebGLTexture | null) {
         this.gl = gl;
         this.normalsTexture = normalsTexture;
 
@@ -120,6 +121,10 @@ export class CaveRenderer {
         gl.uniform1f(gl.getUniformLocation(shader, "u_zoom"), zoom);
         gl.uniform2f(gl.getUniformLocation(shader, "u_pointLightPos"), x, y);
 
+        mat4.identity(m4x);
+        mat4.perspective(m4x, Math.PI / 2, 1, .01, 100);
+        gl.uniformMatrix4fv(gl.getUniformLocation(shader, "u_perspective"), false, m4x);
+
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, this._surfaceInfoBuffers.depth);
         gl.uniform1i(gl.getUniformLocation(shader, "u_depth"), 0);
@@ -141,7 +146,7 @@ export class CaveRenderer {
         gl.drawElements(gl.TRIANGLES, this.indexBufferLen, gl.UNSIGNED_SHORT, 0);
     }
 
-    draw(camera: Camera, shipWorldPos: vec3) {
+    draw(camera: Const<Camera>, shipWorldPos: Const<vec3>) {
         const gl = this.gl;
         const shader = getShaders(gl).cave;
 
@@ -158,7 +163,7 @@ export class CaveRenderer {
         gl.uniformMatrix4fv(gl.getUniformLocation(shader, "u_mvp"), false, m4x);
 
         gl.uniform1f(gl.getUniformLocation(shader, "u_time"), 0);
-        gl.uniform3fv(gl.getUniformLocation(shader, "u_shipWorldPos"), shipWorldPos);
+        gl.uniform3fv(gl.getUniformLocation(shader, "u_shipWorldPos"), unconst(shipWorldPos));
 
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, this._surfaceInfoBuffers.depth);

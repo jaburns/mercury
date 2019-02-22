@@ -3,11 +3,11 @@ import { CaveRenderer } from './caveRenderer';
 import { ShipRenderer } from './shipRenderer';
 import { Camera } from 'graphics/camera';
 import { Transform } from 'graphics/transform';
-import { vec3, quat } from 'gl-matrix';
+import { quat } from 'gl-matrix';
 import { GameState } from 'game/state';
+import { Const } from 'utils/lang';
 
 const trx = Transform.create();
-const qux = quat.create();
 
 export class GameRenderer {
     private readonly gl: WebGLRenderingContext;
@@ -15,12 +15,11 @@ export class GameRenderer {
     private readonly shipRenderer: ShipRenderer;
     private readonly _camera: Camera;
 
-    // TODO replace all instances of Readonly with DeepReadonly in project
-    get camera(): Readonly<Camera> {
+    get camera(): Const<Camera> {
         return this._camera;
     }
 
-    constructor(gl: WebGLRenderingContext, cave: Cave, normalsTexture: WebGLTexture | null) {
+    constructor(gl: WebGLRenderingContext, cave: Const<Cave>, normalsTexture: WebGLTexture | null) {
         this.gl = gl;
         this.caveRenderer = new CaveRenderer(gl, cave, normalsTexture);
         this.shipRenderer = new ShipRenderer(gl);
@@ -32,7 +31,7 @@ export class GameRenderer {
         this.notifyCanvasResize();
     }
 
-    draw(state: GameState) {
+    draw(state: Const<GameState>) {
         const gl = this.gl;
 
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);

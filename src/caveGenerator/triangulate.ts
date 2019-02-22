@@ -45,7 +45,7 @@ const area = (points: ReadonlyArray<vec2>): number => {
     return A / 2;
 };
 
-const inside_triangle = (A: vec2, B: vec2, C: vec2, P: vec2): boolean => {
+const insideTriangle = (A: vec2, B: vec2, C: vec2, P: vec2): boolean => {
     const ax = C[0] - B[0], ay = C[1] - B[1];
     const bx = A[0] - C[0], by = A[1] - C[1];
     const cx = B[0] - A[0], cy = B[1] - A[1];
@@ -71,7 +71,7 @@ const snip = (points: ReadonlyArray<vec2>, u: number, v: number, w: number, n: n
     for (let p = 0; p < n; p++) {
         if ((p == u) || (p == v) || (p == w)) continue;
         const P = points[V[p]];
-        if (inside_triangle(A, B, C, P)) return false;
+        if (insideTriangle(A, B, C, P)) return false;
     }
 
     return true;

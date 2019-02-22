@@ -1,6 +1,6 @@
 import { Transform } from "./transform";
 import { mat4, vec2, vec3, vec4 } from "gl-matrix";
-import { DeepReadonly } from "ts-essentials";
+import { Const, unconst } from "utils/lang";
 
 const m4x = mat4.create();
 const v4x = vec4.create();
@@ -25,12 +25,12 @@ export const Camera = {
         far: 100,
     }),
 
-    getViewMatrix: (self: DeepReadonly<Camera>, out: mat4): mat4 => {
+    getViewMatrix: (self: Const<Camera>, out: mat4): mat4 => {
         Transform.toMatrix(self.transform, out);
         return mat4.invert(out, out) as mat4;
     },
 
-    getProjectionMatrix: (self: DeepReadonly<Camera>, out: mat4): mat4 => {
+    getProjectionMatrix: (self: Const<Camera>, out: mat4): mat4 => {
         return mat4.perspective(out, self.fov, self.aspectRatio, self.near, self.far);
     },
 
@@ -38,7 +38,7 @@ export const Camera = {
         self.aspectRatio = screenWidth / screenHeight;
     },
 
-    screenPointToWorldXYPlanePoint: (self: DeepReadonly<Camera>, screenPoint: vec2, out: vec3): vec3 => {
+    screenPointToWorldXYPlanePoint: (self: Const<Camera>, screenPoint: vec2, out: vec3): vec3 => {
         vec4.set(v4x, 2 * screenPoint[0] - 1, 2 * screenPoint[1] - 1, -1, 1);
 
         // v4x <- ray in view space 
@@ -58,7 +58,7 @@ export const Camera = {
         vec3.set(v3y, 0, 0, -1);
         vec3.set(v3z, 0, 0,  0);
 
-        const t = (vec3.dot(v3y, v3z) - vec3.dot(v3y, self.transform.position as vec3)) / vec3.dot(v3y, v3x);
-        return vec3.scaleAndAdd(out, self.transform.position as vec3, v3x, t);
+        const t = (vec3.dot(v3y, v3z) - vec3.dot(v3y, unconst(self.transform.position))) / vec3.dot(v3y, v3x);
+        return vec3.scaleAndAdd(out, unconst(self.transform.position), v3x, t);
     }
 };

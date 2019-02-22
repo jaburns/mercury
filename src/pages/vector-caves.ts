@@ -198,7 +198,6 @@ const drawDetailedCaveDemo = (cave: Cave, gl: WebGLRenderingContext): void => {
 
     gl.canvas.onmousemove = e => {
         const rect = gl.canvas.getBoundingClientRect();
-        console.log(rect);
         mousePos.x = (e.clientX - rect.left) / gl.canvas.width;
         mousePos.y = 1 - (e.clientY - rect.top)  / gl.canvas.height;
     };
