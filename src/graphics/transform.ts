@@ -1,11 +1,11 @@
 import { vec3, quat, mat4 } from "gl-matrix";
 import { DeepReadonly } from "ts-essentials";
 
-export interface Transform {
-    position: vec3;
-    rotation: quat;
-    scale: vec3;
-}
+export type Transform = {
+    position: vec3,
+    rotation: quat,
+    scale: vec3,
+};
 
 export const Transform = {
     create: (): Transform => ({

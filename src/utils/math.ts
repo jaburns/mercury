@@ -1,11 +1,11 @@
 import { vec2 } from "gl-matrix";
 
-export interface Rect {
+export type Rect = {
     xmin: number,
     ymin: number,
     xmax: number,
     ymax: number,
-}
+};
 
 export const RectTool = {
     area: (r: Rect): number =>

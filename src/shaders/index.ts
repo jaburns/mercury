@@ -7,16 +7,16 @@ import * as gaussianBlur from './gaussianBlur.glsl';//_generated
 import * as normals from './normals.glsl';//_generated
 import * as ship from './ship.glsl';//_generated
 
-interface ShaderCollection {
-    //foreach_shader readonly $: WebGLShader;
-    readonly bufferCopy: WebGLShader;//_generated
-    readonly cave: WebGLShader;//_generated
-    readonly caveDemo: WebGLShader;//_generated
-    readonly flatWhite: WebGLShader;//_generated
-    readonly gaussianBlur: WebGLShader;//_generated
-    readonly normals: WebGLShader;//_generated
-    readonly ship: WebGLShader;//_generated
-}
+type ShaderCollection = {
+    //foreach_shader readonly $: WebGLShader,
+    readonly bufferCopy: WebGLShader,//_generated
+    readonly cave: WebGLShader,//_generated
+    readonly caveDemo: WebGLShader,//_generated
+    readonly flatWhite: WebGLShader,//_generated
+    readonly gaussianBlur: WebGLShader,//_generated
+    readonly normals: WebGLShader,//_generated
+    readonly ship: WebGLShader,//_generated
+};
 
 const buildCollection = (gl: WebGLRenderingContext): ShaderCollection => ({
     //foreach_shader $: compileShader(gl, '$', $),

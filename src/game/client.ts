@@ -7,12 +7,12 @@ import { InputGrabber } from "utils/inputGrabber";
 import { vec2, vec3 } from "gl-matrix";
 import { Camera } from "graphics/camera";
 
-const scratchGameState = GameState.create();
-const v3a = vec3.create();
+const gsx = GameState.create();
+const v3x = vec3.create();
 
-interface LazyResources {
-    readonly caveTexture: WebGLTexture;
-}
+type LazyResources = {
+    readonly caveTexture: WebGLTexture,
+};
 
 const loadResources = (gl: WebGLRenderingContext): Promise<LazyResources> =>
     Promise.all([
@@ -97,16 +97,16 @@ export class GameClient {
             this.tickAccumulator -= TICK_LENGTH_MS;
         }
 
-        GameState.lerp(scratchGameState, this.prevState, this.curState, this.tickAccumulator / TICK_LENGTH_MS);
-        this.gameRenderer.draw(scratchGameState);
+        GameState.lerp(gsx, this.prevState, this.curState, this.tickAccumulator / TICK_LENGTH_MS);
+        this.gameRenderer.draw(gsx);
     }
 
     private readInputs(): PlayerInputs {
-        Camera.screenPointToWorldXYPlanePoint(this.gameRenderer.camera, this.inputs.mouseScreenPoint, v3a);
+        Camera.screenPointToWorldXYPlanePoint(this.gameRenderer.camera, this.inputs.mouseScreenPoint, v3x);
 
         return {
             pressing: this.inputs.mouseDown,
-            mouseWorldPos: vec2.fromValues(v3a[0], v3a[1]),
+            mouseWorldPos: vec2.fromValues(v3x[0], v3x[1]),
         };
     }
 

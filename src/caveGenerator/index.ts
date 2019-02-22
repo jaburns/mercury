@@ -6,20 +6,20 @@ import { findBounds, RectTool } from 'utils/math';
 import { triangulate } from './triangulate';
 import { vec2 } from 'gl-matrix';
 
-export interface Cave {
+export type Cave = {
     edges: vec2[][],
     triangles: number[][],
-}
+};
 
-export interface CaveBuildDetails {
-    automatonResult: Grid<boolean>;
-    coloredGrid: Grid<number>;
-    filledGrid: Grid<boolean>;
-    edgeMarkedGrid: Grid<EdgeMarkedMapTile>;
-    findContoursResult: FindContoursResult;
-    outerMostContourIndex: number;
-    topLeftMostVertexIndex: number;
-}
+export type CaveBuildDetails = {
+    automatonResult: Grid<boolean>,
+    coloredGrid: Grid<number>,
+    filledGrid: Grid<boolean>,
+    edgeMarkedGrid: Grid<EdgeMarkedMapTile>,
+    findContoursResult: FindContoursResult,
+    outerMostContourIndex: number,
+    topLeftMostVertexIndex: number,
+};
 
 const floodFill = (grid: WriteGrid<number>, x: number, y: number, replace: number, value: number, count: number): number => {
     if (x < 0 || y < 0) return count;

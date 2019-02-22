@@ -1,18 +1,18 @@
-export interface PacketWithSender<T> {
-    senderId: string;
-    packet: T;
-}
+export type PacketWithSender<T> = {
+    senderId: string,
+    packet: T,
+};
 
-export interface NetConnection<Send, Receive> {
-    readonly id: string;
-    receivePackets(): PacketWithSender<Receive>[];
-    sendPacket(packet: Send): void;
-}
+export type NetConnection<Send, Receive> = {
+    readonly id: string,
+    receivePackets(): PacketWithSender<Receive>[],
+    sendPacket(packet: Send): void,
+};
 
-export interface SerDe<T> {
-    serialize(x: T): string;
-    deserialize(x: string): T;
-}
+export type SerDe<T> = {
+    serialize(x: T): string,
+    deserialize(x: string): T,
+};
 
 export const createSimpleSerializer = <T>(): SerDe<T> => ({
     serialize: x => JSON.stringify(x),

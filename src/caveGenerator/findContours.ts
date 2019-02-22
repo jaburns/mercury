@@ -2,10 +2,10 @@ import { WriteGrid, Grid, safeOutOfBounds } from 'utils/grid';
 import { smallestDifferenceRadians } from 'utils/math';
 import { vec2 } from 'gl-matrix';
 
-export interface EdgeMarkedMapTile {
+export type EdgeMarkedMapTile = {
     kind: 'air' | 'dirt' | 'edge',
     normal: number,
-}
+};
 
 export const markEdges = (grid: Grid<boolean>): WriteGrid<EdgeMarkedMapTile> => {
     const result = Grid.map(grid, (x, y, val): EdgeMarkedMapTile => 
@@ -44,21 +44,21 @@ export enum WalkedStatus {
     WalkedImportant,
 }
 
-interface WalkCandidate {
+type WalkCandidate = {
     dx: number,
     dy: number,
     normal: number,
-}
+};
 
-interface GridPoint {
+type GridPoint = {
     x: number,
     y: number,
-}
+};
 
-export interface FindContoursResult {
+export type FindContoursResult = {
     contours: vec2[][],
     walkMap: WriteGrid<WalkedStatus>,
-}
+};
 
 export const findContours = (grid: Grid<EdgeMarkedMapTile>, spaceInsurance: 0 | 1 | 2): FindContoursResult => {
     const MAX_ITER = 100;

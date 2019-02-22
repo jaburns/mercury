@@ -1,8 +1,8 @@
-export interface Grid<T> {
+export type Grid<T> = {
     readonly width: number;
     readonly height: number;
     at(x: number, y: number): T;
-}
+};
 
 export type GridCallback<T> = (x: number, y: number, val: T) => void;
 export type GridMapper<T,U> = (x: number, y: number, val: T) => U;

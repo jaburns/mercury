@@ -1,10 +1,10 @@
 import { vec2 } from "gl-matrix";
 
-interface Pt {
+type Pt = {
     pt: vec2,
     controlA: vec2,
     controlB: vec2,
-}
+};
 
 export const smoothCurve = (input: ReadonlyArray<vec2>, resolution: number, curviness: number): vec2[] => {
     const pts: Pt[] = [];
