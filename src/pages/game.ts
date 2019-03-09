@@ -4,6 +4,13 @@ import { GameClient } from "game/client";
 import { ServerPacket, ClientPacket, serverPacketSerializer, clientPacketSerializer } from "game/state";
 
 export const initGame = (): void => {
+    if (typeof (window as any).io === 'undefined') {
+        console.log('Socket.io not available.');
+    } else {
+        console.log('Socket.io found!');
+        //const socket = io();
+    }
+
     const canvas = document.getElementById('game-canvas') as HTMLCanvasElement;
     const network = new LocalNetwork<ServerPacket, ClientPacket>(serverPacketSerializer, clientPacketSerializer);
 
