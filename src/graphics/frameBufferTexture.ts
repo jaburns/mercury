@@ -33,6 +33,7 @@ export class FrameBufferTexture {
 
     releaseTexture(): WebGLTexture {
         const gl = this.gl;
+
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
         gl.deleteFramebuffer(this.framebuffer);
 

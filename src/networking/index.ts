@@ -31,6 +31,8 @@ export class LocalNetwork<ToClient, ToServer> {
     readonly server: NetConnection<ToClient, ToServer>;
     private readonly clients: {[clientId: string]: NetConnection<ToServer, ToClient>};
 
+    latency: number;
+
     constructor(toClientSerDe: SerDe<ToClient>, toServerSerDe: SerDe<ToServer>) {
         this.toClientSerDe = toClientSerDe;
         this.toServerSerDe = toServerSerDe;
@@ -39,6 +41,7 @@ export class LocalNetwork<ToClient, ToServer> {
         this.toClientQueues = {};
 
         this.clients = {};
+        this.latency = 0;
 
         this.server = {
             id: 'server',
@@ -52,12 +55,17 @@ export class LocalNetwork<ToClient, ToServer> {
             sendPacket: (packet: ToClient) => {
                 const serialized = this.toClientSerDe.serialize(packet);
 
-                for (let k in this.toClientQueues) {
-                    this.toClientQueues[k].push({
-                        senderId: 'server',
-                        packet: this.toClientSerDe.deserialize(serialized),
-                    });
-                }
+                setTimeout(
+                    () => {
+                        for (let k in this.toClientQueues) {
+                            this.toClientQueues[k].push({
+                                senderId: 'server',
+                                packet: this.toClientSerDe.deserialize(serialized),
+                            });
+                        }
+                    },
+                    this.latency
+                );
             }
         };
     }
@@ -77,10 +85,15 @@ export class LocalNetwork<ToClient, ToServer> {
             },
 
             sendPacket: (packet: ToServer) => {
-                this.toServerQueue.push({
-                    senderId: id,
-                    packet: this.toServerSerDe.deserialize(this.toServerSerDe.serialize(packet))
-                });
+                setTimeout(
+                    () => {
+                        this.toServerQueue.push({
+                            senderId: id,
+                            packet: this.toServerSerDe.deserialize(this.toServerSerDe.serialize(packet))
+                        });
+                    },
+                    this.latency
+                );
             }
         };
 

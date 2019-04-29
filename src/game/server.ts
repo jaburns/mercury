@@ -1,37 +1,38 @@
 import { NetConnection, TICK_LENGTH_MS } from "networking";
-import { ClientPacket, ServerPacket, GameState } from "./state";
+import { ClientPacket, ServerPacket, GameState, PlayerMap, PlayerInputs, PlayerState } from "./state";
 
 export class GameServer {
     private readonly net: NetConnection<ServerPacket, ClientPacket>;
     private readonly tickIntervalID: number;
     private readonly state: GameState;
-
-    private newestClient: string;
+    private readonly latestPlayerInputs: PlayerMap<PlayerInputs>;
 
     constructor(net: NetConnection<ServerPacket, ClientPacket>) {
         this.net = net;
         this.tickIntervalID = setInterval(this.tick.bind(this), TICK_LENGTH_MS);
         this.state = GameState.create();
-        this.newestClient = '';
+        this.latestPlayerInputs = {};
     }
 
     private tick() {
-        const newPackets = this.net.receivePackets().filter(x => x.senderId === this.newestClient);
+        const newPackets = this.net.receivePackets();
 
-        if (newPackets.length > 0) {
-            const latestInputPacket = newPackets[newPackets.length - 1];
-            GameState.step(this.state, this.state, latestInputPacket.packet);
+        for (let i = 0; i < newPackets.length; ++i) {
+            const packet = newPackets[i];
+            this.latestPlayerInputs[packet.senderId] = packet.packet;
         }
+
+        GameState.step(this.state, this.state, this.latestPlayerInputs);
 
         this.net.sendPacket(this.state);
     }
 
     notifyClientConnect(id: string) {
-        this.newestClient = id;
+        this.state.players[id] = PlayerState.create();
     }
 
     notifyClientDisconnect(id: string) {
-        this.newestClient = '';
+        delete this.state.players[id];
     }
 
     release() {

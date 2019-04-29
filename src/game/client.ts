@@ -98,7 +98,7 @@ export class GameClient {
         }
 
         GameState.lerp(gsx, this.prevState, this.curState, this.tickAccumulator / TICK_LENGTH_MS);
-        this.gameRenderer.draw(gsx);
+        this.gameRenderer.draw(gsx, this.net.id);
     }
 
     private readInputs(): PlayerInputs {

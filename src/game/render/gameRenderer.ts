@@ -31,25 +31,24 @@ export class GameRenderer {
         this.notifyCanvasResize();
     }
 
-    draw(state: Const<GameState>) {
+    draw(state: Const<GameState>, localPlayerId: string) {
         const gl = this.gl;
 
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-        trx.position
+        for (let id in state.players) {
+            let player = state.players[id];
 
-        trx.position[0] = state.shipPos[0];
-        trx.position[1] = state.shipPos[1];
+            trx.position[0] = player.position[0];
+            trx.position[1] = player.position[1];
 
-        quat.fromEuler(trx.rotation, 0, 0, 180 / Math.PI * state.shipAngle);
+            if (id === localPlayerId) {
+                this.caveRenderer.draw(this._camera, trx.position);
+            }
 
-        this.caveRenderer.draw(this._camera, trx.position);
-        this.shipRenderer.draw(this._camera, trx);
-
-        trx.position[0] = 0;
-        trx.position[1] = 0;
-
-        this.shipRenderer.draw(this._camera, trx);
+            quat.fromEuler(trx.rotation, 0, 0, 180 / Math.PI * player.angle);
+            this.shipRenderer.draw(this._camera, trx);
+        }
     }
 
     notifyCanvasResize() {

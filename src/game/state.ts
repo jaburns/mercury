@@ -5,9 +5,15 @@ import { Const, unconst } from 'utils/lang';
 
 const v2x = vec2.create();
 
+export type PlayerMap<T> = {[playerId: string]: T};
+
+export type PlayerState = {
+    position: vec2,
+    angle: number,
+};
+
 export type GameState = {
-    shipPos: vec2,
-    shipAngle: number,
+    players: PlayerMap<PlayerState>,
 };
 
 export type PlayerInputs = {
@@ -21,33 +27,86 @@ export type ServerPacket = GameState;
 export const serverPacketSerializer = createSimpleSerializer<ServerPacket>();
 export const clientPacketSerializer = createSimpleSerializer<ClientPacket>();
 
-export const GameState = {
-    create: (): GameState => ({
-        shipPos: vec2.create(),
-        shipAngle: 0,
+export const PlayerState = {
+    create: (): PlayerState => ({
+        position: vec2.create(),
+        angle: 0,
     }),
 
-    clone: (a: Const<GameState>): GameState => ({
-        shipPos: vec2.clone(unconst(a.shipPos)),
-        shipAngle: a.shipAngle,
-    }),
-
-    lerp: (out: GameState, a: Const<GameState>, b: Const<GameState>, t: number): GameState => {
-        vec2.lerp(out.shipPos, unconst(a.shipPos), unconst(b.shipPos), t);
-        out.shipAngle = lerpRadians(a.shipAngle, b.shipAngle, t);
+    lerp: (out: PlayerState, a: Const<PlayerState>, b: Const<PlayerState>, t: number): PlayerState => {
+        vec2.lerp(out.position, unconst(a.position), unconst(b.position), t);
+        out.angle = lerpRadians(a.angle, b.angle, t);
         return out;
     },
 
-    step: (out: GameState, cur: Const<GameState>, inputs: Const<PlayerInputs>): GameState => {
-        vec2.sub(v2x, unconst(inputs.mouseWorldPos), unconst(cur.shipPos));
-        out.shipAngle = Math.atan2(v2x[1], v2x[0]);
+    copy: (out: PlayerState, a: Const<PlayerState>): PlayerState => {
+        vec2.copy(out.position, unconst(a.position));
+        out.angle = a.angle;
+        return out;
+    },
+};
 
-        if (inputs.pressing) {
-            vec2.normalize(v2x, v2x);
-            vec2.scale(v2x, v2x, 0.1);
-            vec2.add(out.shipPos, unconst(cur.shipPos), v2x);
-        } else {
-            vec2.copy(out.shipPos, unconst(cur.shipPos));
+const matchPlayerCount = (out: GameState, from: Const<GameState>): GameState => {
+    for (let id in out.players) {
+        if (!(id in from.players)) {
+            delete out.players[id];
+        }
+    }
+
+    for (let id in from.players) {
+        if (!(id in out.players)) {
+            out.players[id] = PlayerState.create();
+        }
+    }
+
+    return out;
+};
+
+const applyInputsToPlayer = (out: PlayerState, cur: Const<PlayerState>, inputs: Const<PlayerInputs>, id: string): PlayerState => {
+    vec2.sub(v2x, unconst(inputs.mouseWorldPos), unconst(cur.position));
+    out.angle = Math.atan2(v2x[1], v2x[0]);
+
+    if (inputs.pressing) {
+        vec2.normalize(v2x, v2x);
+        vec2.scale(v2x, v2x, 0.1);
+        vec2.add(out.position, unconst(cur.position), v2x);
+    } else {
+        vec2.copy(out.position, unconst(cur.position));
+    }
+
+    return out;
+};
+
+export const GameState = {
+    create: (): GameState => ({
+        players: {},
+    }),
+
+    clone: (a: Const<GameState>): GameState => 
+        JSON.parse(JSON.stringify(a)) as GameState,
+
+    lerp: (out: GameState, a: Const<GameState>, b: Const<GameState>, t: number): GameState => {
+        matchPlayerCount(out, b);
+
+        for (let id in b.players) {
+            if (id in a.players) {
+                PlayerState.lerp(out.players[id], a.players[id], b.players[id], t);
+            }
+            else {
+                PlayerState.copy(out.players[id], b.players[id]);
+            }
+        }
+
+        return out;
+    },
+
+    step: (out: GameState, cur: Const<GameState>, inputs: Const<PlayerMap<PlayerInputs>>): GameState => {
+        matchPlayerCount(out, cur);
+
+        for (let id in cur.players) {
+            if (id in inputs) {
+                applyInputsToPlayer(out.players[id], cur.players[id], inputs[id], id);
+            }
         }
 
         return out;
