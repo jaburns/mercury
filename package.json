@@ -7,18 +7,18 @@
     "watch": "webpack --watch"
   },
   "devDependencies": {
-    "@types/gl-matrix": "^2.4.5",
-    "@types/lodash": "^4.14.120",
-    "awesome-typescript-loader": "^5.2.1",
-    "express": "^4.16.4",
-    "gl-matrix": "^3.0.0",
-    "lodash": "^4.17.11",
-    "pre-build-webpack": "^0.1.0",
-    "raw-loader": "^1.0.0",
-    "socket.io": "^2.2.0",
-    "ts-essentials": "^2.0.0",
-    "typescript": "^3.2.2",
-    "webpack": "^4.28.1",
-    "webpack-cli": "^3.2.1"
+    "@types/gl-matrix": "~2.4.5",
+    "@types/lodash": "~4.14.120",
+    "awesome-typescript-loader": "~5.2.1",
+    "express": "~4.16.4",
+    "gl-matrix": "~3.0.0",
+    "lodash": "~4.17.11",
+    "pre-build-webpack": "~0.1.0",
+    "raw-loader": "~1.0.0",
+    "socket.io": "~2.2.0",
+    "ts-essentials": "2.0.0",
+    "typescript": "~3.2.2",
+    "webpack": "~4.28.1",
+    "webpack-cli": "~3.2.1"
   }
 }
