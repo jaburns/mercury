@@ -4,12 +4,13 @@ export class InputGrabber {
     private readonly canvas: HTMLCanvasElement;
     readonly mouseScreenPoint: vec2;
     private _mouseDown: boolean;
-    private canvasBoundingRect: ClientRect | DOMRect;
+    private canvasBoundingRect: { left: number, top: number };
 
     constructor(canvas: HTMLCanvasElement) {
         this.canvas = canvas;
         this._mouseDown = false;
         this.mouseScreenPoint = vec2.create();
+        this.canvasBoundingRect = { left: 0, top: 0 };
 
         canvas.addEventListener('mousemove',  this.onMouseMove.bind(this));
         canvas.addEventListener('mousedown',  this.onMouseDown.bind(this));
@@ -36,7 +37,9 @@ export class InputGrabber {
     }
 
     private onWindowChange() {
-        this.canvasBoundingRect = this.canvas.getBoundingClientRect();
+        const clientRect = this.canvas.getBoundingClientRect();
+        this.canvasBoundingRect.left = clientRect.left  + this.canvas.clientLeft;
+        this.canvasBoundingRect.top = clientRect.top + this.canvas.clientTop;
     }
 
     private onMouseMove(e: MouseEvent) {
