@@ -1,25 +1,28 @@
 import { vec2 } from "gl-matrix";
+import { EventBinder } from "./eventBinder";
 
 export class InputGrabber {
+    private readonly eventBinder: EventBinder;
     private readonly canvas: HTMLCanvasElement;
     readonly mouseScreenPoint: vec2;
     private _mouseDown: boolean;
     private canvasBoundingRect: { left: number, top: number };
 
     constructor(canvas: HTMLCanvasElement) {
+        this.eventBinder = new EventBinder(this);
         this.canvas = canvas;
         this._mouseDown = false;
         this.mouseScreenPoint = vec2.create();
         this.canvasBoundingRect = { left: 0, top: 0 };
 
-        canvas.addEventListener('mousemove',  this.onMouseMove.bind(this));
-        canvas.addEventListener('mousedown',  this.onMouseDown.bind(this));
-        canvas.addEventListener('mouseup',    this.onMouseButtonNegative.bind(this));
-        canvas.addEventListener('mouseout',   this.onMouseButtonNegative.bind(this));
-        canvas.addEventListener('mouseleave', this.onMouseButtonNegative.bind(this));
+        this.eventBinder.bind(canvas, 'mousemove',  this.onMouseMove);
+        this.eventBinder.bind(canvas, 'mousedown',  this.onMouseDown);
+        this.eventBinder.bind(canvas, 'mouseup',    this.onMouseButtonNegative);
+        this.eventBinder.bind(canvas, 'mouseout',   this.onMouseButtonNegative);
+        this.eventBinder.bind(canvas, 'mouseleave', this.onMouseButtonNegative);
 
-        window.addEventListener('scroll', this.onWindowChange.bind(this));
-        window.addEventListener('resize', this.onWindowChange.bind(this));
+        this.eventBinder.bind(window, 'scroll', this.onWindowChange);
+        this.eventBinder.bind(window, 'resize', this.onWindowChange);
 
         this.onWindowChange();
     }
@@ -48,6 +51,6 @@ export class InputGrabber {
     }
 
     release() {
-        // TODO unbind all events
+        this.eventBinder.unbindAll();
     }
 }
