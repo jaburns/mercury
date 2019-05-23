@@ -5,7 +5,9 @@ export type PacketWithSender<T> = {
 
 export type NetConnection<Send, Receive> = {
     readonly id: string,
-    receivePackets(): PacketWithSender<Receive>[],
+    countAvailablePackets(): number,
+    receivePacket(): PacketWithSender<Receive> | null,
+    receiveAllPackets(): PacketWithSender<Receive>[],
     sendPacket(packet: Send): void,
 };
 
@@ -46,9 +48,19 @@ export class LocalNetwork<ToClient, ToServer> {
         this.server = {
             id: 'server',
 
-            receivePackets: (): PacketWithSender<ToServer>[] => {
+            countAvailablePackets: (): number => this.toServerQueue.length,
+
+            receiveAllPackets: (): PacketWithSender<ToServer>[] => {
                 const result = this.toServerQueue.slice();
                 this.toServerQueue.length = 0;
+                return result;
+            },
+
+            receivePacket: (): PacketWithSender<ToServer> | null => {
+                if (this.toServerQueue.length < 1) return null;
+
+                const result = this.toServerQueue[0];
+                this.toServerQueue.splice(0, 1);
                 return result;
             },
 
@@ -78,9 +90,19 @@ export class LocalNetwork<ToClient, ToServer> {
         this.clients[id] = {
             id,
 
-            receivePackets: (): PacketWithSender<ToClient>[] => {
+            countAvailablePackets: (): number => this.toClientQueues[id].length,
+
+            receiveAllPackets: (): PacketWithSender<ToClient>[] => {
                 const result = this.toClientQueues[id].slice();
                 this.toClientQueues[id].length = 0;
+                return result;
+            },
+
+            receivePacket: (): PacketWithSender<ToClient> | null => {
+                if (this.toClientQueues[id].length < 1) return null;
+
+                const result = this.toClientQueues[id][0];
+                this.toClientQueues[id].splice(0, 1);
                 return result;
             },
 

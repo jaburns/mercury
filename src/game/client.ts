@@ -84,12 +84,11 @@ export class GameClient {
         const latestInputs = this.readInputs();
 
         while (this.tickAccumulator >= TICK_LENGTH_MS) {
-            const newPackets = this.net.receivePackets();
+            const maybeNewPacket = this.net.receivePacket();
 
-            if (newPackets.length > 0) {
-                const newestPacket = newPackets[newPackets.length - 1];
+            if (maybeNewPacket) {
                 this.prevState = this.curState;
-                this.curState = newestPacket.packet;
+                this.curState = maybeNewPacket.packet;
             }
 
             this.net.sendPacket(latestInputs);

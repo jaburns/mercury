@@ -13,6 +13,7 @@ export type PlayerState = {
 };
 
 export type GameState = {
+    tick: number,
     players: PlayerMap<PlayerState>,
 };
 
@@ -79,6 +80,7 @@ const applyInputsToPlayer = (out: PlayerState, cur: Const<PlayerState>, inputs: 
 
 export const GameState = {
     create: (): GameState => ({
+        tick: 0,
         players: {},
     }),
 
@@ -87,6 +89,8 @@ export const GameState = {
 
     lerp: (out: GameState, a: Const<GameState>, b: Const<GameState>, t: number): GameState => {
         matchPlayerCount(out, b);
+
+        out.tick = b.tick;
 
         for (let id in b.players) {
             if (id in a.players) {
@@ -102,6 +106,8 @@ export const GameState = {
 
     step: (out: GameState, cur: Const<GameState>, inputs: Const<PlayerMap<PlayerInputs>>): GameState => {
         matchPlayerCount(out, cur);
+
+        out.tick = cur.tick + 1;
 
         for (let id in cur.players) {
             if (id in inputs) {

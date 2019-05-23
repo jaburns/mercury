@@ -15,7 +15,7 @@ export class GameServer {
     }
 
     private tick() {
-        const newPackets = this.net.receivePackets();
+        const newPackets = this.net.receiveAllPackets();
 
         for (let i = 0; i < newPackets.length; ++i) {
             const packet = newPackets[i];
