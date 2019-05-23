@@ -36,13 +36,18 @@ export const initLocalMultiGame = (): void => {
     const canvas1 = document.getElementById('canvas-1') as HTMLCanvasElement;
     const network = new LocalNetwork<ServerPacket, ClientPacket>(serverPacketSerializer, clientPacketSerializer);
 
-    const client0 = network.createClient();
-    const client1 = network.createClient();
-
     const server = new GameServer(network.server);
-    const game0 = new GameClient(canvas0, client0, 1338);
-    const game1 = new GameClient(canvas1, client1, 1338);
 
-    server.notifyClientConnect(client0.id);
-    server.notifyClientConnect(client1.id);
+    const waitAndAddClient = (canvas: HTMLCanvasElement, millis: number) => 
+        setTimeout(
+            () => { 
+                const client = network.createClient();
+                new GameClient(canvas, client, 1338);
+                server.notifyClientConnect(client.id);
+            },
+            millis
+        );
+
+    waitAndAddClient(canvas0,  500);
+    waitAndAddClient(canvas1, 1000);
 };
