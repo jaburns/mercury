@@ -5,6 +5,7 @@ import { Const, unconst } from 'utils/lang';
 
 const v2x = vec2.create();
 
+export type PlayerId = string;
 export type PlayerMap<T> = {[playerId: string]: T};
 
 export type PlayerState = {
@@ -14,10 +15,13 @@ export type PlayerState = {
 
 export type GameState = {
     tick: number,
+    predictedTick: number,
     players: PlayerMap<PlayerState>,
 };
 
 export type PlayerInputs = {
+    uid: string,
+    tick: number,
     mouseWorldPos: vec2,
     pressing: boolean,
 };
@@ -81,16 +85,15 @@ const applyInputsToPlayer = (out: PlayerState, cur: Const<PlayerState>, inputs: 
 export const GameState = {
     create: (): GameState => ({
         tick: 0,
+        predictedTick: 0,
         players: {},
     }),
-
-    clone: (a: Const<GameState>): GameState => 
-        JSON.parse(JSON.stringify(a)) as GameState,
 
     lerp: (out: GameState, a: Const<GameState>, b: Const<GameState>, t: number): GameState => {
         matchPlayerCount(out, b);
 
         out.tick = b.tick;
+        out.predictedTick = b.predictedTick;
 
         for (let id in b.players) {
             if (id in a.players) {
@@ -108,6 +111,7 @@ export const GameState = {
         matchPlayerCount(out, cur);
 
         out.tick = cur.tick + 1;
+        out.predictedTick = out.tick;
 
         for (let id in cur.players) {
             if (id in inputs) {
@@ -115,6 +119,10 @@ export const GameState = {
             }
         }
 
+        return out;
+    },
+
+    predict: (out: GameState, cur: Const<GameState>, input: PlayerInputs, playerId: PlayerId): GameState => {
         return out;
     },
 };
