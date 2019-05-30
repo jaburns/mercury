@@ -2,6 +2,7 @@ import { createSimpleSerializer } from "networking";
 import { vec2 } from "gl-matrix";
 import { lerpRadians } from "utils/math";
 import { Const, unconst } from 'utils/lang';
+import cloneDeep = require('lodash/cloneDeep');
 
 const v2x = vec2.create();
 
@@ -11,6 +12,7 @@ export type PlayerMap<T> = {[playerId: string]: T};
 export type PlayerState = {
     position: vec2,
     angle: number,
+    lastInputUID: string,
 };
 
 export type GameState = {
@@ -36,35 +38,19 @@ export const PlayerState = {
     create: (): PlayerState => ({
         position: vec2.create(),
         angle: 0,
+        lastInputUID: '',
     }),
 
-    lerp: (out: PlayerState, a: Const<PlayerState>, b: Const<PlayerState>, t: number): PlayerState => {
+    clone: (from: Const<PlayerState>): PlayerState => cloneDeep(from) as PlayerState,
+
+    lerp: (a: Const<PlayerState>, b: Const<PlayerState>, t: number): PlayerState => {
+        const out = PlayerState.clone(b);
+
         vec2.lerp(out.position, unconst(a.position), unconst(b.position), t);
         out.angle = lerpRadians(a.angle, b.angle, t);
+
         return out;
     },
-
-    copy: (out: PlayerState, a: Const<PlayerState>): PlayerState => {
-        vec2.copy(out.position, unconst(a.position));
-        out.angle = a.angle;
-        return out;
-    },
-};
-
-const matchPlayerCount = (out: GameState, from: Const<GameState>): GameState => {
-    for (let id in out.players) {
-        if (!(id in from.players)) {
-            delete out.players[id];
-        }
-    }
-
-    for (let id in from.players) {
-        if (!(id in out.players)) {
-            out.players[id] = PlayerState.create();
-        }
-    }
-
-    return out;
 };
 
 const applyInputsToPlayer = (out: PlayerState, cur: Const<PlayerState>, inputs: Const<PlayerInputs>, id: string): PlayerState => {
@@ -79,6 +65,8 @@ const applyInputsToPlayer = (out: PlayerState, cur: Const<PlayerState>, inputs: 
         vec2.copy(out.position, unconst(cur.position));
     }
 
+    out.lastInputUID = inputs.uid;
+
     return out;
 };
 
@@ -89,28 +77,24 @@ export const GameState = {
         players: {},
     }),
 
-    lerp: (out: GameState, a: Const<GameState>, b: Const<GameState>, t: number): GameState => {
-        matchPlayerCount(out, b);
+    clone: (from: Const<GameState>): GameState => cloneDeep(from) as GameState,
 
-        out.tick = b.tick;
-        out.predictedTick = b.predictedTick;
+    lerp: (a: Const<GameState>, b: Const<GameState>, t: number): GameState => {
+        const out = GameState.clone(b);
 
         for (let id in b.players) {
             if (id in a.players) {
-                PlayerState.lerp(out.players[id], a.players[id], b.players[id], t);
-            }
-            else {
-                PlayerState.copy(out.players[id], b.players[id]);
+                out.players[id] = PlayerState.lerp(a.players[id], b.players[id], t);
             }
         }
 
         return out;
     },
 
-    step: (out: GameState, cur: Const<GameState>, inputs: Const<PlayerMap<PlayerInputs>>): GameState => {
-        matchPlayerCount(out, cur);
+    step: (cur: Const<GameState>, inputs: Const<PlayerMap<PlayerInputs>>): GameState => {
+        const out = GameState.clone(cur);
 
-        out.tick = cur.tick + 1;
+        out.tick++;
         out.predictedTick = out.tick;
 
         for (let id in cur.players) {
@@ -122,7 +106,13 @@ export const GameState = {
         return out;
     },
 
-    predict: (out: GameState, cur: Const<GameState>, input: PlayerInputs, playerId: PlayerId): GameState => {
+    predict: (cur: Const<GameState>, input: Const<PlayerInputs>, playerId: PlayerId): GameState => {
+        const out = GameState.clone(cur);
+
+        out.predictedTick++;
+
+        applyInputsToPlayer(out.players[playerId], cur.players[playerId], input, playerId);
+
         return out;
     },
 };

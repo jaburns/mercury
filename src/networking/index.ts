@@ -43,7 +43,7 @@ export class LocalNetwork<ToClient, ToServer> {
         this.toClientQueues = {};
 
         this.clients = {};
-        this.latency = 0;
+        this.latency = 100;
 
         this.server = {
             id: 'server',
