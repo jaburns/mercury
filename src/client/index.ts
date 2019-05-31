@@ -1,5 +1,5 @@
-import { initPost as initPost_vectorCaves } from 'pages/vector-caves';
-import { initGame, initLocalMultiGame } from 'pages/game';
+import { initPost as initPost_vectorCaves } from './vector-caves';
+import { initGame, initLocalMultiGame } from './game';
 
 const postInitters: {[key: string]: () => void} = {
     'vector-caves': initPost_vectorCaves,

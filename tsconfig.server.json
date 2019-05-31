@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "baseUrl": "./src",
+    "outDir": "./build",
     "target": "es5",
     "module": "commonjs",
     "noImplicitAny": true,
@@ -13,6 +14,6 @@
     "src/**/*"
   ],
   "exclude": [
-    "src/server"
+    "src/client"
   ]
 }

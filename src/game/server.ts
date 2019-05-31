@@ -3,9 +3,9 @@ import { ClientPacket, ServerPacket, GameState, PlayerMap, PlayerInputs, PlayerS
 
 export class GameServer {
     private readonly net: NetConnection<ServerPacket, ClientPacket>;
-    private readonly tickIntervalID: number;
-    private readonly state: GameState;
+    private readonly tickIntervalID: any;
     private readonly latestPlayerInputs: PlayerMap<PlayerInputs>;
+    private state: GameState;
 
     constructor(net: NetConnection<ServerPacket, ClientPacket>) {
         this.net = net;
@@ -22,7 +22,7 @@ export class GameServer {
             this.latestPlayerInputs[packet.senderId] = packet.packet;
         }
 
-        GameState.step(this.state, this.state, this.latestPlayerInputs);
+        this.state = GameState.step(this.state, this.latestPlayerInputs);
 
         this.net.sendPacket(this.state);
     }
