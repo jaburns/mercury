@@ -5,7 +5,6 @@ import path = require('path');
 import express = require('express');
 import io = require('socket.io');
 import { createServer } from 'http';
-import { generateCave } from 'caveGenerator';
 
 const app = express();
 const server = createServer(app);
@@ -21,7 +20,3 @@ ioApp.on('connection', socket => {
 });
 
 server.listen(PORT, () => console.log('Listening on '+PORT));
-
-console.log('hello server');
-
-console.log(generateCave(2345));
