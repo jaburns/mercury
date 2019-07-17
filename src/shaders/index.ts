@@ -4,6 +4,7 @@ import * as cave from './cave.glsl';//_generated
 import * as caveDemo from './caveDemo.glsl';//_generated
 import * as flatWhite from './flatWhite.glsl';//_generated
 import * as gaussianBlur from './gaussianBlur.glsl';//_generated
+import * as generateRockTexture from './generateRockTexture.glsl';//_generated
 import * as normals from './normals.glsl';//_generated
 import * as ship from './ship.glsl';//_generated
 
@@ -14,6 +15,7 @@ type ShaderCollection = {
     readonly caveDemo: WebGLShader,//_generated
     readonly flatWhite: WebGLShader,//_generated
     readonly gaussianBlur: WebGLShader,//_generated
+    readonly generateRockTexture: WebGLShader,//_generated
     readonly normals: WebGLShader,//_generated
     readonly ship: WebGLShader,//_generated
 };
@@ -25,6 +27,7 @@ const buildCollection = (gl: WebGLRenderingContext): ShaderCollection => ({
     caveDemo: compileShader(gl, 'caveDemo', caveDemo),//_generated
     flatWhite: compileShader(gl, 'flatWhite', flatWhite),//_generated
     gaussianBlur: compileShader(gl, 'gaussianBlur', gaussianBlur),//_generated
+    generateRockTexture: compileShader(gl, 'generateRockTexture', generateRockTexture),//_generated
     normals: compileShader(gl, 'normals', normals),//_generated
     ship: compileShader(gl, 'ship', ship),//_generated
 });

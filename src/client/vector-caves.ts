@@ -145,10 +145,11 @@ export const initPost = () :void => {
     genSlider.oninput = genSlider.onchange = updatePartialAutomatonResult;
     (document.getElementById('generate-new') as HTMLButtonElement).onclick = () => location.reload(); 
 
-    const gl = [0,1,2].map(x => (document.getElementById('canvas'+x) as HTMLCanvasElement).getContext('webgl') as WebGLRenderingContext);
+    const gl = [0,1,2,3].map(x => (document.getElementById('canvas'+x) as HTMLCanvasElement).getContext('webgl') as WebGLRenderingContext);
     drawInfoBufferDemo(caveCache, 'depth', gl[0]);
     drawInfoBufferDemo(caveCache, 'normal', gl[1]);
-    drawDetailedCaveDemo(caveCache, gl[2])
+    drawTextureDemo(gl[2]);
+    drawDetailedCaveDemo(caveCache, gl[3])
 };
 
 const randomColorHex = (): string => {
@@ -189,6 +190,19 @@ const drawInfoBufferDemo = (cave: Cave, kind: 'depth'|'normal', gl: WebGLRenderi
     copyBlit.release();
     gl.deleteTexture(infoBuffers.depth);
     gl.deleteTexture(infoBuffers.normal);
+};
+
+const drawTextureDemo = (gl: WebGLRenderingContext): void => {
+    gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+    gl.clearColor(0, 1, 0, 1);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+    const renderer = new BufferRenderer(gl, getShaders(gl).generateRockTexture);
+    renderer.draw(null, (gl, shader) => {
+        gl.uniform2f(gl.getUniformLocation(shader, "u_resolution"), gl.canvas.width, gl.canvas.height);
+    });
+
+    renderer.release();
 };
 
 const drawDetailedCaveDemo = (cave: Cave, gl: WebGLRenderingContext): void => {

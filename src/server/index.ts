@@ -12,7 +12,7 @@ const ioApp = io(server);
 
 const PORT = process.env.PORT || '3000';
 
-app.use(express.static(path.join(__dirname, './docs')));
+app.use(express.static(path.join(__dirname, '../../docs')));
 app.get('/', (req, res) => res.redirect('/index.html'));
 
 ioApp.on('connection', socket => {
